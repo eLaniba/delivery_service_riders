@@ -61,7 +61,8 @@ getCurrentLocation() async {
 
       Placemark pMark = placeMarks![0];
 
-      completeAddress = '${pMark.subThoroughfare} ${pMark.thoroughfare}, ${pMark.subLocality} ${pMark.locality}, ${pMark.subAdministrativeArea}, ${pMark.administrativeArea} ${pMark.postalCode}, ${pMark.country}';
+      // completeAddress = '${pMark.subThoroughfare} ${pMark.thoroughfare}, ${pMark.subLocality} ${pMark.locality}, ${pMark.subAdministrativeArea}, ${pMark.administrativeArea} ${pMark.postalCode}, ${pMark.country}';
+      completeAddress = '${pMark.street}, ${pMark.locality}, ${pMark.administrativeArea}, ${pMark.country}';
 
       locationController.text = completeAddress;
     } catch (e) {
@@ -180,7 +181,7 @@ getCurrentLocation() async {
                             labelText: 'Your location',
                             controller: locationController,
                             isObscure: false,
-                            enabled: false,
+                            enabled: true,
                             validator: validateLocation,
                           ),
                         ),
@@ -206,7 +207,7 @@ getCurrentLocation() async {
                           }
 
                           if (_formKey.currentState!.validate()) {
-                            print('shhhheeeeeeeeeeeeeeeeeeeeeeeshhhhhhhhhhhhhhhhhhhhhhhhhhhhhh');
+                            //Register
                           }
 
                         });
