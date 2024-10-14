@@ -1,11 +1,19 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:delivery_service_riders/mainScreens/home_screen.dart';
 import 'package:delivery_service_riders/widgets/custom_text_field_validations.dart';
+import 'package:delivery_service_riders/widgets/error_dialog.dart';
+import 'package:delivery_service_riders/widgets/loading_dialog.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../global/global.dart';
 import '../widgets/custom_text_field.dart';
 
 class Register extends StatefulWidget {
@@ -31,7 +39,7 @@ class _RegisterState extends State<Register> {
   Position? position;
   List<Placemark>? placeMarks;
 
-  String sellerImageUrl = "";
+  String riderImageUrl = "";
   String completeAddress = "";
 
   Future<void> _getImage() async
@@ -42,7 +50,7 @@ class _RegisterState extends State<Register> {
     });
   }
 
-getCurrentLocation() async {
+  getCurrentLocation() async {
     try {
       const LocationSettings locationSettings = LocationSettings(
         accuracy: LocationAccuracy.high,
@@ -59,16 +67,111 @@ getCurrentLocation() async {
         position!.longitude,
       );
 
-      Placemark pMark = placeMarks![0];
+      Placemark pMark = placeMarks![1];
 
-      // completeAddress = '${pMark.subThoroughfare} ${pMark.thoroughfare}, ${pMark.subLocality} ${pMark.locality}, ${pMark.subAdministrativeArea}, ${pMark.administrativeArea} ${pMark.postalCode}, ${pMark.country}';
-      completeAddress = '${pMark.street}, ${pMark.locality}, ${pMark.administrativeArea}, ${pMark.country}';
+      completeAddress = '${pMark.street}, ${pMark.locality}, ${pMark.subAdministrativeArea}, ${pMark.country}';
 
       locationController.text = completeAddress;
     } catch (e) {
       rethrow;
     }
 }
+
+  registerNow() {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (c) {
+        return const LoadingDialog(message: "Checking credentials");
+      },
+    );
+
+    //Authenticate Riders and Save Data to Firestore if != null
+    authenticateRider();
+
+  }
+
+  void authenticateRider() async {
+    User? currentUser;
+
+    await firebaseAuth.createUserWithEmailAndPassword(
+      email: emailController.text.trim(),
+      password: passwordController.text.trim(),
+    ).then((auth) {
+      currentUser = auth.user;
+    }).catchError((error){
+      Navigator.pop(context);
+      showDialog(
+          context: context,
+          builder: (c)
+          {
+            return ErrorDialog(
+              message: error.message.toString(),
+            );
+          }
+      );
+    });
+
+    if(currentUser != null)
+    {
+      await uploadImage();
+
+      saveDataToFirestore(currentUser!).then((value) {
+        Navigator.pop(context);
+        //send user to homePage
+        Route newRoute = MaterialPageRoute(builder: (c) => const HomeScreen());
+        Navigator.pushReplacement(context, newRoute);
+      });
+    }
+  }
+
+  Future<void> uploadImage() async {
+    try {
+      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      FirebaseStorage fStorage = FirebaseStorage.instance;
+
+      Reference reference = fStorage.ref().child("riders").child(fileName);
+
+      UploadTask uploadTask = reference.putFile(File(imageXFile!.path));
+
+      TaskSnapshot taskSnapshot = await uploadTask;
+
+      riderImageUrl = await taskSnapshot.ref.getDownloadURL();
+    } catch (e) {
+      Navigator.pop(context);
+      showDialog(
+          context: context,
+          builder: (c)
+          {
+            return ErrorDialog(
+              message: e.toString(),
+            );
+          }
+      );
+    }
+  }
+
+  Future saveDataToFirestore(User currentUser) async {
+    FirebaseFirestore.instance.collection("riders").doc(currentUser.uid).set({
+      "riderUID": currentUser.uid,
+      "riderEmail": currentUser.email,
+      "riderName": nameController.text.trim(),
+      "riderAvatarUrl": riderImageUrl,
+      "phone": phoneController.text.trim(),
+      "address": completeAddress,
+      "status": "approved",
+      "earnings": 0.0,
+      "lat": position!.latitude,
+      "lng": position!.longitude,
+    });
+
+    //Save data locally
+    sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences!.setString("uid", currentUser.uid);
+    await sharedPreferences!.setString("email", currentUser.email.toString());
+    await sharedPreferences!.setString("name", nameController.text.trim());
+    await sharedPreferences!.setString("photoUrl", riderImageUrl);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -204,22 +307,20 @@ getCurrentLocation() async {
                             imageValidation = "Please pick an image";
                           } else {
                             imageValidation = "";
-                          }
 
-                          if (_formKey.currentState!.validate()) {
-                            //Register
+                            if (_formKey.currentState!.validate()) {
+                              //Register
+                              registerNow();
+                            }
                           }
-
                         });
-
-
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: Theme.of(context).colorScheme.inversePrimary,
                         padding: const EdgeInsets.only(left: 64, right: 64),
                       ),
-                      child: const Text("Login"),
+                      child: const Text("Register"),
                     ),
                   ],
                 ),
