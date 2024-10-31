@@ -21,17 +21,17 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen2> {
   String orderDateRead() {
     DateTime orderTimeRead = widget.orderDetail!.orderTime!.toDate();
 
-    String fromattedOrderTime = DateFormat('MMMM d, y h:mm a').format(orderTimeRead);
-    return fromattedOrderTime;
+    String formattedOrderTime = DateFormat('MMMM d, y h:mm a').format(orderTimeRead);
+    return formattedOrderTime;
   }
 
   //Popup Note
-  void showDialogNote(String message) {
+  void showDialogNote() {
     showDialog(context: context, builder: (BuildContext context) {
       return AlertDialog(
-        title: Text('Accept Order?'),
-        content: Text(
-          message,
+        title: const Text('Accept Order?'),
+        content: const Text(
+          'You are about to accept this order. Once you are successfully assigned as the rider, please proceed to the store.',
           // textAlign: TextAlign.center,
         ),
         actions: [
@@ -103,7 +103,7 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen2> {
         SnackBar(
           content: Text('Failed to accept order: $e'),
           backgroundColor: Colors.red, // Optional: Set background color for error
-          duration: Duration(seconds: 5), // Optional: How long the snackbar is shown
+          duration: const Duration(seconds: 5), // Optional: How long the snackbar is shown
         ),
       );
     }
@@ -167,6 +167,15 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen2> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
+                                  //Order Information Text
+                                  const Text(
+                                    'Order Information',
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  //Order Status
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     // crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,6 +202,7 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen2> {
                                     ],
                                   ),
                                   const SizedBox(height: 4,),
+                                  //Order ID
                                   RichText(
                                     text: TextSpan(
                                         children: [
@@ -215,6 +225,7 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen2> {
                                     ),
                                   ),
                                   const SizedBox(height: 4,),
+                                  //Order Time
                                   RichText(
                                     text: TextSpan(
                                         children: [
@@ -236,6 +247,7 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen2> {
                                         ]
                                     ),
                                   ),
+                                  //Payment Method
                                   const Text(
                                     'Payment method',
                                     style: TextStyle(
@@ -243,6 +255,7 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen2> {
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
+                                  //Cash on Delivery
                                   const Row(
                                     children: [
                                       SizedBox(
@@ -269,17 +282,101 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen2> {
                               ),
                             ),
                           ),
+                          //Store Information
+                          Container(
+                            // height: 180,
+                            color: Colors.white,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  //Order from Text
+                                  const Text(
+                                    'Order from',
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  //Store Icon, Name, and Phone Number
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      const SizedBox(
+                                        child: Icon(
+                                          Icons.storefront_outlined,
+                                          // color: Colors.orange,
+                                          size: 16,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        width: 8,
+                                      ),
+                                      Flexible(
+                                        child: Text(
+                                          '${widget.orderDetail!.storeName}',
+                                          style:const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        width: 4,
+                                      ),
+                                      Text(
+                                        '${widget.orderDetail!.storePhone}',
+                                        style: const TextStyle(
+                                          color: Colors.grey,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  //Store Address
+                                  Text(
+                                    '${widget.orderDetail!.storeAddress}',
+                                    style:const TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 14,),
+                                  const DottedLine(
+                                    dashColor: Colors.grey,
+                                    lineThickness: 2,
+                                    dashLength: 10,
+                                    dashGapLength: 4,
+                                    dashRadius: 2,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                           //User Information
                           Container(
                             // height: 180,
                             color: Colors.white,
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  //Store Name
+                                  //Order from Text
+                                  const Text(
+                                    'Deliver to',
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  //User Icon, Name, and Phone Number
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -401,8 +498,9 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen2> {
                               ],
                             ),
                           ),
-                          // Fixed height ListView.builder
+                          // Fixed Height ListView.builder
                           Container(
+                            padding: const EdgeInsets.only(bottom: 24),
                             height: 250,
                             color: Colors.white,
                             child: ListView.builder(
@@ -471,35 +569,32 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen2> {
             bottom: 0,
             child: Container(
               color: Colors.white,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    RichText(
-                      text: TextSpan(
-                          children: [
-                            const TextSpan(
-                              text: 'Total Order: ',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 16,
-                              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  RichText(
+                    text: TextSpan(
+                        children: [
+                          const TextSpan(
+                            text: 'Total Order: ',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 16,
                             ),
-                            TextSpan(
-                              text: "₱${widget.orderDetail!.orderTotal!.toStringAsFixed(2)}",
-                              style: const TextStyle(
-                                color: Colors.orange,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          ),
+                          TextSpan(
+                            text: "₱${widget.orderDetail!.orderTotal!.toStringAsFixed(2)}",
+                            style: const TextStyle(
+                              color: Colors.orange,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ]
-                      ),
+                          ),
+                        ]
                     ),
-                    const SizedBox(width: 16,),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 16,),
+                ],
               ),
             ),
           ),
@@ -512,7 +607,7 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen2> {
           child: TextButton(
             onPressed: () {
               //cod here
-              showDialogNote('You are about to accept an order. After accepting, prepare the items and click \'Send to Rider\' to let the rider know it’s ready.');
+              showDialogNote();
             },
             child: const Text(
               'Accept Order',
