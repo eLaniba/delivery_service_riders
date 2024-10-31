@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/authentication/auth_screen.dart';
 import 'package:delivery_service_riders/global/global.dart';
-import 'package:delivery_service_riders/mainScreens/home_screen.dart';
+import 'package:delivery_service_riders/mainScreens/main_screen.dart';
 import 'package:delivery_service_riders/widgets/custom_text_field.dart';
 import 'package:delivery_service_riders/widgets/custom_text_field_validations.dart';
 import 'package:delivery_service_riders/widgets/error_dialog.dart';
@@ -66,7 +66,7 @@ class _LoginState extends State<Login> {
         await sharedPreferences!.setString("photoUrl", snapshot.data()!["riderAvatarUrl"]);
 
         Navigator.pop(context);
-        Navigator.push(context, MaterialPageRoute(builder: (c) => const HomeScreen()));
+        Navigator.push(context, MaterialPageRoute(builder: (c) => const MainScreen()));
       } else {
         firebaseAuth.signOut();
         Navigator.pop(context);
@@ -140,6 +140,7 @@ class _LoginState extends State<Login> {
 
                         if (_formKey.currentState!.validate()) {
                           //Login
+                          loginNow();
                         }
                       },
                       style: ElevatedButton.styleFrom(
