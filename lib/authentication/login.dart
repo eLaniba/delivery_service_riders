@@ -63,10 +63,11 @@ class _LoginState extends State<Login> {
         await sharedPreferences!.setString("uid", currentUser.uid);
         await sharedPreferences!.setString("email", snapshot.data()!["riderEmail"]);
         await sharedPreferences!.setString("name", snapshot.data()!["riderName"]);
+        await sharedPreferences!.setString("phone", snapshot.data()!["phone"]);
         await sharedPreferences!.setString("photoUrl", snapshot.data()!["riderAvatarUrl"]);
 
         Navigator.pop(context);
-        Navigator.push(context, MaterialPageRoute(builder: (c) => const MainScreen()));
+        Navigator.push(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 0, inProgressScreenIndex: 0,)));
       } else {
         firebaseAuth.signOut();
         Navigator.pop(context);

@@ -119,7 +119,7 @@ class _RegisterState extends State<Register> {
       saveDataToFirestore(currentUser!).then((value) {
         Navigator.pop(context);
         //send user to homePage
-        Route newRoute = MaterialPageRoute(builder: (c) => const MainScreen());
+        Route newRoute = MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 0, inProgressScreenIndex: 0,));
         Navigator.pushReplacement(context, newRoute);
       });
     }

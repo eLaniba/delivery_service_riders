@@ -1,15 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/global/global.dart';
-import 'package:delivery_service_riders/mainScreens/inProgressScreens/in_progress_main_screen.dart';
-import 'package:delivery_service_riders/mainScreens/main_screen.dart';
 import 'package:delivery_service_riders/models/new_order.dart';
 import 'package:delivery_service_riders/widgets/loading_dialog.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class NewDeliveryScreen2 extends StatefulWidget {
-  NewDeliveryScreen2({
+class StorePickupScreen2 extends StatefulWidget {
+  StorePickupScreen2({
     super.key,
     this.orderDetail,
   });
@@ -17,10 +15,10 @@ class NewDeliveryScreen2 extends StatefulWidget {
   NewOrder? orderDetail;
 
   @override
-  State<NewDeliveryScreen2> createState() => _NewDeliveryScreenState();
+  State<StorePickupScreen2> createState() => _StorePickupScreen2State();
 }
 
-class _NewDeliveryScreenState extends State<NewDeliveryScreen2> {
+class _StorePickupScreen2State extends State<StorePickupScreen2> {
   String orderDateRead() {
     DateTime orderTimeRead = widget.orderDetail!.orderTime!.toDate();
 
@@ -89,7 +87,7 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen2> {
       // Close the loading dialog
       Navigator.of(context).pop();
 
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 2, inProgressScreenIndex: 0)));
+      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 2, inProgressScreenIndex: 0)));
 
       // Show a success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
@@ -119,6 +117,15 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen2> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Order Details'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.help_outline_outlined),
+            ),
+          ),
+        ],
       ),
       backgroundColor: Colors.grey[200],
       body: Stack(
@@ -199,7 +206,7 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen2> {
                                         child: Text(
                                           '${widget.orderDetail!.orderStatus}',
                                           style:const TextStyle(
-                                            fontSize: 16,
+                                            fontSize: 14,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),

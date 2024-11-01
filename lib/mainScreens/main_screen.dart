@@ -1,45 +1,58 @@
 import 'package:delivery_service_riders/global/global.dart';
+import 'package:delivery_service_riders/mainScreens/inProgressScreens/in_progress_main_screen.dart';
 import 'package:delivery_service_riders/mainScreens/new_delivery_screen.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  MainScreen({
+    super.key,
+    required this.mainScreenIndex,
+    required this.inProgressScreenIndex,
+  });
+
+ int mainScreenIndex;
+ int inProgressScreenIndex;
 
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int widgetIndex = 0;
+  late final List<Widget> _screens;
 
-  final List<Widget> _screens = [
-    const Placeholder(child: Center(child: Text('My Profile'),),),
-    const NewDeliveryScreen(),
-    const Placeholder(child: Center(child: Text('In Progress Delivery'),),),
-  ];
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _screens = [
+      const Placeholder(child: Center(child: Text('My Profile'),),),
+      const NewDeliveryScreen(),
+      InProgressMainScreen(index: widget.inProgressScreenIndex,),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widgetIndex == 0
+          widget.mainScreenIndex == 0
               ? '${sharedPreferences!.getString('name')}'
-              : widgetIndex == 1
+              : widget.mainScreenIndex == 1
               ? 'New Delivery'
               : 'In Progress Delivery'
         ),
         automaticallyImplyLeading: false,
       ),
       backgroundColor: Colors.grey[200],
-      body: _screens[widgetIndex],
+      body: _screens[widget.mainScreenIndex],
       bottomNavigationBar: BottomNavigationBar(
         onTap: (index) {
           setState(() {
-            widgetIndex = index;
+            widget.mainScreenIndex = index;
           });
         },
-        currentIndex: widgetIndex,
+        currentIndex: widget.mainScreenIndex,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.person_2_outlined),
