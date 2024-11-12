@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/mainScreens/inProgressScreens/store_pickup_screen_2.dart';
 import 'package:delivery_service_riders/models/new_order.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ class _StorePickupScreenState extends State<StorePickupScreen> {
         StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('active_orders')
+              .where('riderID', isEqualTo: '${sharedPreferences!.get('uid')}')
               .where('orderStatus', isEqualTo: 'Rider found! Picking the order from the store')
               .orderBy('orderTime', descending: true)
               .snapshots(),
@@ -61,17 +63,19 @@ class _StorePickupScreenState extends State<StorePickupScreen> {
                                 ),
                               ],
                             ),
-                            //Icon + User Name
+                            //Icon, Store Name, Store Phone Icon '>'
                             Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
+                                //Icon Store
                                 const SizedBox(
                                   child: Icon(
-                                    Icons.person_2_outlined,
+                                    Icons.storefront_outlined,
                                     size: 16,
                                   ),
                                 ),
                                 const SizedBox(width: 8,),
+                                //Store Name and Phone
                                 Expanded(
                                   child: RichText(
                                     text: TextSpan(

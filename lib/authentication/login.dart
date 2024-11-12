@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/authentication/auth_screen.dart';
 import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/mainScreens/main_screen.dart';
+import 'package:delivery_service_riders/services/geopoint_json.dart';
 import 'package:delivery_service_riders/widgets/custom_text_field.dart';
 import 'package:delivery_service_riders/widgets/custom_text_field_validations.dart';
 import 'package:delivery_service_riders/widgets/error_dialog.dart';
@@ -60,11 +61,18 @@ class _LoginState extends State<Login> {
         .get()
         .then((snapshot) async {
       if (snapshot.exists) {
+        // Retrieve the GeoPoint
+        GeoPoint userLocation = snapshot.data()!["riderLocation"];
+
+        // Convert GeoPoint to JSON string
+        String locationString = geoPointToJson(userLocation);
+
         await sharedPreferences!.setString("uid", currentUser.uid);
         await sharedPreferences!.setString("email", snapshot.data()!["riderEmail"]);
         await sharedPreferences!.setString("name", snapshot.data()!["riderName"]);
-        await sharedPreferences!.setString("phone", snapshot.data()!["phone"]);
-        await sharedPreferences!.setString("photoUrl", snapshot.data()!["riderAvatarUrl"]);
+        await sharedPreferences!.setString("phone", snapshot.data()!["riderPhone"]);
+        await sharedPreferences!.setString("photoUrl", snapshot.data()!["riderImageURL"]);
+        await sharedPreferences!.setString("location", locationString);
 
         Navigator.pop(context);
         Navigator.push(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 0, inProgressScreenIndex: 0,)));

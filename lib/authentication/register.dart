@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:delivery_service_riders/global/permission_service.dart';
 import 'package:delivery_service_riders/mainScreens/main_screen.dart';
+import 'package:delivery_service_riders/services/geopoint_json.dart';
 import 'package:delivery_service_riders/widgets/custom_text_field_validations.dart';
 import 'package:delivery_service_riders/widgets/error_dialog.dart';
 import 'package:delivery_service_riders/widgets/loading_dialog.dart';
@@ -11,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../global/global.dart';
@@ -39,8 +42,9 @@ class _RegisterState extends State<Register> {
   Position? position;
   List<Placemark>? placeMarks;
 
-  String riderImageUrl = "";
+  String riderImageURL = "";
   String completeAddress = "";
+  GeoPoint? geoPoint;
 
   Future<void> _getImage() async
   {
@@ -51,29 +55,38 @@ class _RegisterState extends State<Register> {
   }
 
   getCurrentLocation() async {
-    try {
-      const LocationSettings locationSettings = LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 100,
-      );
+    PermissionService permissionService = PermissionService();
 
-      Position newPosition = await Geolocator.getCurrentPosition(
-        locationSettings: locationSettings,
-      );
+    await permissionService.requestLocationPermission();
+    if (await Permission.location.isGranted) {
+      try {
+        const LocationSettings locationSettings = LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 100,
+        );
 
-      position = newPosition;
-      placeMarks = await placemarkFromCoordinates(
-        position!.latitude,
-        position!.longitude,
-      );
+        Position newPosition = await Geolocator.getCurrentPosition(
+          locationSettings: locationSettings,
+        );
 
-      Placemark pMark = placeMarks![1];
+        position = newPosition;
+        placeMarks = await placemarkFromCoordinates(
+          position!.latitude,
+          position!.longitude,
+        );
 
-      completeAddress = '${pMark.street}, ${pMark.locality}, ${pMark.subAdministrativeArea}, ${pMark.country}';
+        geoPoint = GeoPoint(position!.latitude, position!.longitude);
 
-      locationController.text = completeAddress;
-    } catch (e) {
-      rethrow;
+        Placemark pMark = placeMarks![1];
+
+        completeAddress = '${pMark.street}, ${pMark.locality}, ${pMark.subAdministrativeArea}, ${pMark.country}';
+
+        locationController.text = completeAddress;
+      } catch (e) {
+        rethrow;
+      }
+    } else {
+      print('Location permission is not granted');
     }
 }
 
@@ -136,7 +149,7 @@ class _RegisterState extends State<Register> {
 
       TaskSnapshot taskSnapshot = await uploadTask;
 
-      riderImageUrl = await taskSnapshot.ref.getDownloadURL();
+      riderImageURL = await taskSnapshot.ref.getDownloadURL();
     } catch (e) {
       Navigator.pop(context);
       showDialog(
@@ -153,24 +166,24 @@ class _RegisterState extends State<Register> {
 
   Future saveDataToFirestore(User currentUser) async {
     FirebaseFirestore.instance.collection("riders").doc(currentUser.uid).set({
-      "riderUID": currentUser.uid,
+      "riderID": currentUser.uid,
       "riderEmail": currentUser.email,
       "riderName": nameController.text.trim(),
-      "riderAvatarUrl": riderImageUrl,
-      "phone": phoneController.text.trim(),
-      "address": completeAddress,
-      "status": "approved",
-      "earnings": 0.0,
-      "lat": position!.latitude,
-      "lng": position!.longitude,
+      "riderImageURL": riderImageURL,
+      "riderPhone": phoneController.text.trim(),
+      "riderAddress": locationController.text.trim(),
+      "riderStatus": "approved",
+      "riderLocation": geoPoint,
     });
 
     //Save data locally
+    String locationString = geoPointToJson(geoPoint!);
     sharedPreferences = await SharedPreferences.getInstance();
     await sharedPreferences!.setString("uid", currentUser.uid);
     await sharedPreferences!.setString("email", currentUser.email.toString());
     await sharedPreferences!.setString("name", nameController.text.trim());
-    await sharedPreferences!.setString("photoUrl", riderImageUrl);
+    await sharedPreferences!.setString("photoUrl", riderImageURL);
+    await sharedPreferences!.setString("location", locationString);
   }
 
   @override

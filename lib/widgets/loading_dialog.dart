@@ -25,7 +25,10 @@ class LoadingDialog extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8,),
-          Text("$message\, please wait..."),
+          Text(
+            "$message\, please wait...",
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );

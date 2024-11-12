@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/global/global.dart';
+import 'package:delivery_service_riders/mainScreens/main_screen.dart';
 import 'package:delivery_service_riders/models/new_order.dart';
 import 'package:delivery_service_riders/widgets/loading_dialog.dart';
 import 'package:dotted_line/dotted_line.dart';
@@ -19,6 +20,8 @@ class StorePickupScreen2 extends StatefulWidget {
 }
 
 class _StorePickupScreen2State extends State<StorePickupScreen2> {
+  BuildContext? loadingDialogContext;
+
   String orderDateRead() {
     DateTime orderTimeRead = widget.orderDetail!.orderTime!.toDate();
 
@@ -112,6 +115,50 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
     }
   }
 
+  void _requestPickupConfirmation() {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (c) {
+          return const LoadingDialog(message: "Requesting confirmation from the store");
+        }
+    );
+
+  }
+
+  void showLoadingDialog() {
+    // if(loadingDialogContext != null) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        loadingDialogContext = context;
+        return const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 20,),
+              Text(
+                "Requesting confirmation from the store, please wait...",
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void closeLoadingDialog() {
+    if (loadingDialogContext != null) {
+      Navigator.of(loadingDialogContext!).pop();
+      loadingDialogContext = null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -130,331 +177,366 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
       backgroundColor: Colors.grey[200],
       body: Stack(
         children: [
-          CustomScrollView(
-            slivers: [
-              StreamBuilder<DocumentSnapshot>(
-                stream: FirebaseFirestore.instance.collection('active_orders').doc('${widget.orderDetail!.orderID}').snapshots(),
-                builder: (context, snapshot) {
-                  if(!snapshot.hasData) {
-                    return const SliverFillRemaining(
-                      child: Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                  } else if(!snapshot.hasData || !snapshot.data!.exists) {
-                    return const SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.remove_shopping_cart_outlined,
-                            color: Colors.grey,
-                            size: 48,
-                          ),
-                          Text(
-                            'Error encounter, please try again',
-                            style: TextStyle(
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
+          StreamBuilder<DocumentSnapshot>(
+            stream: FirebaseFirestore.instance.collection('active_orders').doc('${widget.orderDetail!.orderID}').snapshots(),
+            builder: (context, snapshot) {
+              if(snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator(),);
+              }
 
-                  return SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Column(
-                        children: [
-                          //Order Information
-                          Container(
-                            // height: 140,
-                            color: Colors.white,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
+              if (snapshot.hasError) {
+                // Show a SnackBar when there's an error
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: ${snapshot.error}')),
+                  );
+                });
+                return SizedBox(); // Return an empty widget as a placeholder
+              }
+
+              NewOrder order = NewOrder.fromJson(snapshot.data!.data() as Map<String, dynamic>);
+
+              if (order.orderStatus == 'Order picked up! Your order is on its way!') {
+                closeLoadingDialog();
+
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Future.delayed(const Duration(milliseconds: 100), () {
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (c) {
+                        return const AlertDialog(
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.check_circle_outline_rounded,
+                                color: Colors.green,
+                                size: 50,
+                              ),
+                              SizedBox(height: 20,),
+                              Text(
+                                "Pick up request confirmed. You may now deliver the order to the customer",
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  });
+                });
+
+                Future.delayed(const Duration(seconds: 3), () {
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 2, inProgressScreenIndex: 1)));
+                });
+              }
+
+              return SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Column(
+                    children: [
+                      //Order Information
+                      Container(
+                        // height: 140,
+                        color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              //Order Information Text
+                              const Text(
+                                'Order Information',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              //Order Status
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                // crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  //Order Information Text
-                                  const Text(
-                                    'Order Information',
-                                    style: TextStyle(
-                                      color: Colors.grey,
-                                      fontWeight: FontWeight.bold,
+                                  const SizedBox(
+                                    child: Icon(
+                                      Icons.circle,
+                                      color: Colors.orange,
+                                      size: 16,
                                     ),
                                   ),
-                                  //Order Status
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    // crossAxisAlignment: CrossAxisAlignment.start,
+                                  const SizedBox(
+                                    width: 8,
+                                  ),
+                                  Flexible(
+                                    child: Text(
+                                      '${order.orderStatus}',
+                                      style:const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4,),
+                              //Order ID
+                              RichText(
+                                text: TextSpan(
                                     children: [
-                                      const SizedBox(
-                                        child: Icon(
-                                          Icons.circle,
-                                          color: Colors.orange,
-                                          size: 16,
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        width: 8,
-                                      ),
-                                      Flexible(
-                                        child: Text(
-                                          '${widget.orderDetail!.orderStatus}',
-                                          style:const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4,),
-                                  //Order ID
-                                  RichText(
-                                    text: TextSpan(
-                                        children: [
-                                          const TextSpan(
-                                            text: 'Order ID: ',
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          TextSpan(
-                                            text: '${widget.orderDetail!.orderID}',
-                                            style: const TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                        ]
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4,),
-                                  //Order Time
-                                  RichText(
-                                    text: TextSpan(
-                                        children: [
-                                          const TextSpan(
-                                            text: 'Order time: ',
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          TextSpan(
-                                            text: orderDateRead(),
-                                            style: const TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                        ]
-                                    ),
-                                  ),
-                                  //Payment Method
-                                  const Text(
-                                    'Payment method',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  //Cash on Delivery
-                                  const Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 16,
-                                      ),
-                                      Icon(Icons.payment_rounded),
-                                      Text(
-                                        ' Cash on Delivery',
+                                      const TextSpan(
+                                        text: 'Order ID: ',
                                         style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: '${widget.orderDetail!.orderID}',
+                                        style: const TextStyle(
+                                          color: Colors.black,
                                           fontSize: 16,
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8,),
-                                  const DottedLine(
-                                    dashColor: Colors.grey,
-                                    lineThickness: 2,
-                                    dashLength: 10,
-                                    dashGapLength: 4,
-                                    dashRadius: 2,
-                                  ),
-                                ],
+                                    ]
+                                ),
                               ),
-                            ),
-                          ),
-                          //Store Information
-                          Container(
-                            // height: 180,
-                            color: Colors.white,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  //Order from Text
-                                  const Text(
-                                    'Order from',
-                                    style: TextStyle(
-                                      color: Colors.grey,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  //Store Icon, Name, and Phone Number
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                              const SizedBox(height: 4,),
+                              //Order Time
+                              RichText(
+                                text: TextSpan(
                                     children: [
-                                      const SizedBox(
-                                        child: Icon(
-                                          Icons.storefront_outlined,
-                                          // color: Colors.orange,
-                                          size: 16,
+                                      const TextSpan(
+                                        text: 'Order time: ',
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                      const SizedBox(
-                                        width: 8,
-                                      ),
-                                      Flexible(
-                                        child: Text(
-                                          '${widget.orderDetail!.storeName}',
-                                          style:const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        width: 4,
-                                      ),
-                                      Text(
-                                        '${widget.orderDetail!.storePhone}',
+                                      TextSpan(
+                                        text: orderDateRead(),
                                         style: const TextStyle(
-                                          color: Colors.grey,
+                                          color: Colors.black,
+                                          fontSize: 16,
                                         ),
-                                      )
-                                    ],
+                                      ),
+                                    ]
+                                ),
+                              ),
+                              //Payment Method
+                              const Text(
+                                'Payment method',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              //Cash on Delivery
+                              const Row(
+                                children: [
+                                  SizedBox(
+                                    width: 16,
                                   ),
-                                  //Store Address
+                                  Icon(Icons.payment_rounded),
                                   Text(
-                                    '${widget.orderDetail!.storeAddress}',
-                                    style:const TextStyle(
+                                    ' Cash on Delivery',
+                                    style: TextStyle(
                                       fontSize: 16,
                                     ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 14,),
-                                  const DottedLine(
-                                    dashColor: Colors.grey,
-                                    lineThickness: 2,
-                                    dashLength: 10,
-                                    dashGapLength: 4,
-                                    dashRadius: 2,
                                   ),
                                 ],
                               ),
-                            ),
-                          ),
-                          //User Information
-                          Container(
-                            // height: 180,
-                            color: Colors.white,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  //Order from Text
-                                  const Text(
-                                    'Deliver to',
-                                    style: TextStyle(
-                                      color: Colors.grey,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  //User Icon, Name, and Phone Number
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      const SizedBox(
-                                        child: Icon(
-                                          Icons.person_2_outlined,
-                                          // color: Colors.orange,
-                                          size: 16,
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        width: 8,
-                                      ),
-                                      Flexible(
-                                        child: Text(
-                                          '${widget.orderDetail!.userName}',
-                                          style:const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        width: 4,
-                                      ),
-                                      Text(
-                                        '${widget.orderDetail!.userPhone}',
-                                        style: const TextStyle(
-                                          color: Colors.grey,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                  //Store Address
-                                  Text(
-                                    '${widget.orderDetail!.userAddress}',
-                                    style:const TextStyle(
-                                      fontSize: 16,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 14,),
-                                  const DottedLine(
-                                    dashColor: Colors.grey,
-                                    lineThickness: 2,
-                                    dashLength: 10,
-                                    dashGapLength: 4,
-                                    dashRadius: 2,
-                                  ),
-                                ],
+                              const SizedBox(height: 8,),
+                              const DottedLine(
+                                dashColor: Colors.grey,
+                                lineThickness: 2,
+                                dashLength: 10,
+                                dashGapLength: 4,
+                                dashRadius: 2,
                               ),
-                            ),
+                            ],
                           ),
-                          //Rider Information
-                          Container(
-                            color: Colors.white,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              child: Row(
+                        ),
+                      ),
+                      //Store Information
+                      Container(
+                        // height: 180,
+                        color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              //Order from Text
+                              const Text(
+                                'Order from',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              //Store Icon, Name, and Phone Number
+                              Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
+                                  const SizedBox(
+                                    child: Icon(
+                                      Icons.storefront_outlined,
+                                      // color: Colors.orange,
+                                      size: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    width: 8,
+                                  ),
+                                  Flexible(
+                                    child: Text(
+                                      '${widget.orderDetail!.storeName}',
+                                      style:const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    width: 4,
+                                  ),
+                                  Text(
+                                    '${widget.orderDetail!.storePhone}',
+                                    style: const TextStyle(
+                                      color: Colors.grey,
+                                    ),
+                                  )
+                                ],
+                              ),
+                              //Store Address
+                              Text(
+                                '${widget.orderDetail!.storeAddress}',
+                                style:const TextStyle(
+                                  fontSize: 16,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 14,),
+                              const DottedLine(
+                                dashColor: Colors.grey,
+                                lineThickness: 2,
+                                dashLength: 10,
+                                dashGapLength: 4,
+                                dashRadius: 2,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      //User Information
+                      Container(
+                        // height: 180,
+                        color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              //Order from Text
+                              const Text(
+                                'Deliver to',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              //User Icon, Name, and Phone Number
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const SizedBox(
+                                    child: Icon(
+                                      Icons.person_2_outlined,
+                                      // color: Colors.orange,
+                                      size: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    width: 8,
+                                  ),
+                                  Flexible(
+                                    child: Text(
+                                      '${widget.orderDetail!.userName}',
+                                      style:const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    width: 4,
+                                  ),
+                                  Text(
+                                    '${widget.orderDetail!.userPhone}',
+                                    style: const TextStyle(
+                                      color: Colors.grey,
+                                    ),
+                                  )
+                                ],
+                              ),
+                              //Store Address
+                              Text(
+                                '${widget.orderDetail!.userAddress}',
+                                style:const TextStyle(
+                                  fontSize: 16,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 14,),
+                              const DottedLine(
+                                dashColor: Colors.grey,
+                                lineThickness: 2,
+                                dashLength: 10,
+                                dashGapLength: 4,
+                                dashRadius: 2,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      //Rider Information
+                      Container(
+                        color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              //Rider(You) text
+                              const Text(
+                                'Rider(You)',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              //Rider Icon, Name, and Phone
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  //Rider Icon
                                   const SizedBox(
                                     child: Icon(
                                       Icons.sports_motorsports_outlined,
@@ -465,6 +547,7 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
                                   const SizedBox(
                                     width: 8,
                                   ),
+                                  //Rider name, conditional
                                   Flexible(
                                     child: Text(
                                       widget.orderDetail!.riderID != null
@@ -481,7 +564,7 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
                                   const SizedBox(
                                     width: 4,
                                   ),
-
+                                  //Rider phone number, conditional
                                   if (widget.orderDetail!.riderID != null)
                                     Text(
                                       '${widget.orderDetail!.riderPhone}',
@@ -493,88 +576,89 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
                                     const Text(''),
                                 ],
                               ),
-                            ),
+                            ],
                           ),
-                          //Item(s) text
-                          Container(
-                            color: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: const Row(
-                              children: [
-                                Text(
-                                  'Item(s)',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      //Item(s) text
+                      Container(
+                        color: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: const Row(
+                          children: [
+                            Text(
+                              'Item(s)',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Fixed Height ListView.builder
+                      Container(
+                        padding: const EdgeInsets.only(bottom: 24),
+                        height: 250,
+                        color: Colors.white,
+                        child: ListView.builder(
+                          itemCount: widget.orderDetail!.items!.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              leading: Container(
+                                height: 50,
+                                width: 50,
+                                decoration: BoxDecoration(
+                                  border: Border.all(),
+                                ),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.image,
+                                    color: Colors.grey,
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                          // Fixed Height ListView.builder
-                          Container(
-                            padding: const EdgeInsets.only(bottom: 24),
-                            height: 250,
-                            color: Colors.white,
-                            child: ListView.builder(
-                              itemCount: widget.orderDetail!.items!.length,
-                              itemBuilder: (context, index) {
-                                return ListTile(
-                                  leading: Container(
-                                    height: 50,
-                                    width: 50,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(),
-                                    ),
-                                    child: const Center(
-                                      child: Icon(
-                                        Icons.image,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
+                              ),
+                              title: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${widget.orderDetail!.items![index].itemName}',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  title: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '${widget.orderDetail!.items![index].itemName}',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      Text(
-                                        '₱ ${widget.orderDetail!.items![index].itemPrice!.toStringAsFixed(2)}',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      Text(
-                                        '₱ ${widget.orderDetail!.items![index].itemTotal!.toStringAsFixed(2)}',
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      const DottedLine(),
-                                    ],
+                                  Text(
+                                    '₱ ${widget.orderDetail!.items![index].itemPrice!.toStringAsFixed(2)}',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  trailing: Text(
-                                    'x${widget.orderDetail!.items![index].itemQnty}',
+                                  Text(
+                                    '₱ ${widget.orderDetail!.items![index].itemTotal!.toStringAsFixed(2)}',
                                     style: const TextStyle(
-                                      fontSize: 14,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
                                     ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
+                                  const DottedLine(),
+                                ],
+                              ),
+                              trailing: Text(
+                                'x${widget.orderDetail!.items![index].itemQnty}',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
-            ],
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
+
           Positioned(
             left: 0,
             right: 0,
@@ -610,6 +694,7 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
               ),
             ),
           ),
+
         ],
       ),
       bottomNavigationBar: BottomAppBar(
@@ -617,12 +702,9 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
           height: 60,
           color: Colors.black,
           child: TextButton(
-            onPressed: () {
-              //cod here
-              showDialogNote();
-            },
+            onPressed: showLoadingDialog,
             child: const Text(
-              'Accept Order',
+              'Request Pickup Confirmation',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
