@@ -75,17 +75,17 @@ class _LoginState extends State<Login> {
         await sharedPreferences!.setString("location", locationString);
 
         Navigator.pop(context);
-        Navigator.push(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 0, inProgressScreenIndex: 0,)));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 0, inProgressScreenIndex: 0,)));
       } else {
         firebaseAuth.signOut();
         Navigator.pop(context);
-        Navigator.push(context, MaterialPageRoute(builder: (c) => const AuthScreen()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => const AuthScreen()));
 
         showDialog(
           context: context,
           builder: (c) {
             return const ErrorDialog(
-              message: "You have been logged out"
+              message: "Login Failed, please try again"
             );
           }
         );

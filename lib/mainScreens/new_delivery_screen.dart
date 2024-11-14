@@ -20,7 +20,7 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen> {
         StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('active_orders')
-              .where('orderStatus', isEqualTo: 'Waiting for a rider')
+              .where('orderStatus', isEqualTo: 'Waiting')
               .orderBy('orderTime', descending: true)
               .snapshots(),
           builder: (context, orderSnapshot) {

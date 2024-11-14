@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/global/permission_service.dart';
 import 'package:delivery_service_riders/mainScreens/main_screen.dart';
 import 'package:delivery_service_riders/services/geopoint_json.dart';
+import 'package:delivery_service_riders/services/image_picker_service.dart';
 import 'package:delivery_service_riders/widgets/custom_text_field_validations.dart';
 import 'package:delivery_service_riders/widgets/error_dialog.dart';
 import 'package:delivery_service_riders/widgets/loading_dialog.dart';
@@ -12,6 +13,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -46,11 +48,17 @@ class _RegisterState extends State<Register> {
   String completeAddress = "";
   GeoPoint? geoPoint;
 
-  Future<void> _getImage() async
+  Future<void> _getImage(ImageSource source) async
   {
-    imageXFile = await _picker.pickImage(source: ImageSource.gallery);
+    imageXFile = await ImagePickerService().pickCropImage(
+      cropAspectRatio: const CropAspectRatio(ratioX: 4, ratioY: 5),
+      imageSrouce: source,
+    );
     setState(() {
       imageXFile;
+      if (imageXFile != null) {
+        imageValidation = "";
+      }
     });
   }
 
@@ -127,7 +135,7 @@ class _RegisterState extends State<Register> {
 
     if(currentUser != null)
     {
-      await uploadImage();
+      await uploadImage(currentUser);
 
       saveDataToFirestore(currentUser!).then((value) {
         Navigator.pop(context);
@@ -138,12 +146,12 @@ class _RegisterState extends State<Register> {
     }
   }
 
-  Future<void> uploadImage() async {
+  Future<void> uploadImage(User? currentUser) async {
     try {
       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
       FirebaseStorage fStorage = FirebaseStorage.instance;
 
-      Reference reference = fStorage.ref().child("riders").child(fileName);
+      Reference reference = fStorage.ref().child("riders").child(currentUser!.uid.toString()).child(fileName);
 
       UploadTask uploadTask = reference.putFile(File(imageXFile!.path));
 
@@ -180,8 +188,8 @@ class _RegisterState extends State<Register> {
     String locationString = geoPointToJson(geoPoint!);
     sharedPreferences = await SharedPreferences.getInstance();
     await sharedPreferences!.setString("uid", currentUser.uid);
-    await sharedPreferences!.setString("email", currentUser.email.toString());
     await sharedPreferences!.setString("name", nameController.text.trim());
+    await sharedPreferences!.setString("phone", phoneController.text.trim());
     await sharedPreferences!.setString("photoUrl", riderImageURL);
     await sharedPreferences!.setString("location", locationString);
   }
@@ -205,7 +213,115 @@ class _RegisterState extends State<Register> {
             ),
 
             InkWell(
-              onTap: _getImage,
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) {
+                    // return Container(
+                    //   height: 130,
+                    //   padding: EdgeInsets.all(16),
+                    //   child: Column(
+                    //     crossAxisAlignment: CrossAxisAlignment.start,
+                    //     mainAxisAlignment: MainAxisAlignment.center,
+                    //     children: [
+                    //       InkWell(
+                    //         onTap: () {
+                    //           Navigator.pop(context);
+                    //           _getImage(ImageSource.camera);
+                    //         },
+                    //         child: Row(
+                    //
+                    //           mainAxisAlignment: MainAxisAlignment.center,
+                    //           children: [
+                    //             Icon(Icons.camera_alt_outlined),
+                    //             SizedBox(width: 8,),
+                    //             Text(
+                    //               "Use camera",
+                    //               style: TextStyle(
+                    //                 fontSize: 18,
+                    //               ),
+                    //             ),
+                    //           ],
+                    //         ),
+                    //       ),
+                    //       SizedBox(height: 16,),
+                    //       InkWell(
+                    //         onTap: () {
+                    //           Navigator.pop(context);
+                    //           _getImage(ImageSource.gallery);
+                    //         },
+                    //         child: Row(
+                    //           mainAxisAlignment: MainAxisAlignment.center,
+                    //           children: [
+                    //             Icon(Icons.image_outlined),
+                    //             Text(
+                    //               "Choose from gallery",
+                    //               style: TextStyle(
+                    //                 fontSize: 18,
+                    //               ),
+                    //             ),
+                    //           ],
+                    //         ),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // );
+                    return Container(
+                      height: 150,
+                      width: MediaQuery.of(context).size.width,
+                      padding: EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Upload',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 16,),
+                          Row(
+                            children: [
+                              //Use Camera
+                              InkWell(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  _getImage(ImageSource.camera);
+                                },
+                                child: const Column(
+                                  children: [
+                                    CircleAvatar(
+                                      child: Icon(Icons.camera_alt_outlined),
+                                    ),
+                                    Text('Camera'),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(width: 24,),
+                              //Use Gallery
+                              InkWell(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  _getImage(ImageSource.gallery);
+                                },
+                                child: const Column(
+                                  children: [
+                                    CircleAvatar(
+                                      child: Icon(Icons.image_outlined),
+                                    ),
+                                    Text('Gallery'),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
               splashColor: Colors.white,
               highlightColor: Colors.white,
               child: CircleAvatar(

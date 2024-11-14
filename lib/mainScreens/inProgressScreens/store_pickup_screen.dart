@@ -1,9 +1,12 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/mainScreens/inProgressScreens/store_pickup_screen_2.dart';
 import 'package:delivery_service_riders/models/new_order.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:shimmer/shimmer.dart';
 
 class StorePickupScreen extends StatefulWidget {
   const StorePickupScreen({super.key});
@@ -21,7 +24,7 @@ class _StorePickupScreenState extends State<StorePickupScreen> {
           stream: FirebaseFirestore.instance
               .collection('active_orders')
               .where('riderID', isEqualTo: '${sharedPreferences!.get('uid')}')
-              .where('orderStatus', isEqualTo: 'Rider found! Picking the order from the store')
+              .where('orderStatus', isEqualTo: 'Assigned')
               .orderBy('orderTime', descending: true)
               .snapshots(),
           builder: (context, orderSnapshot) {
@@ -134,10 +137,41 @@ class _StorePickupScreenState extends State<StorePickupScreen> {
                                           height: 80,
                                           width: 80,
                                           color: Colors.grey[200],
-                                          child: const Center(
-                                            child: Icon(
-                                              Icons.image,
-                                              color: Colors.grey,
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(8),
+                                            child: order.items![index].itemImageURL != null
+                                                ? CachedNetworkImage(
+                                              imageUrl: '${order.items![index].itemImageURL}',
+                                              fit: BoxFit.fill,
+                                              placeholder: (context, url) => Shimmer.fromColors(
+                                                baseColor: Colors.grey[300]!,
+                                                highlightColor: Colors.grey[100]!,
+                                                child: Center(
+                                                  child: Icon(
+                                                    PhosphorIcons.image(
+                                                        PhosphorIconsStyle.fill),
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                              ),
+                                              errorWidget: (context, url, error) =>
+                                                  Container(
+                                                    color: Colors.grey[200],
+                                                    child: Icon(
+                                                      PhosphorIcons.imageBroken(
+                                                          PhosphorIconsStyle.fill),
+                                                      color: Colors.grey,
+                                                      size: 48,
+                                                    ),
+                                                  ),
+                                            )
+                                                : Container(
+                                              color: Colors.grey[200],
+                                              child: Icon(
+                                                PhosphorIcons.imageBroken(
+                                                    PhosphorIconsStyle.fill),
+                                                color: Colors.grey,
+                                              ),
                                             ),
                                           ),
                                         ),

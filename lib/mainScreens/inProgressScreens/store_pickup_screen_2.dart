@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/mainScreens/main_screen.dart';
@@ -6,6 +7,8 @@ import 'package:delivery_service_riders/widgets/loading_dialog.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:shimmer/shimmer.dart';
 
 class StorePickupScreen2 extends StatefulWidget {
   StorePickupScreen2({
@@ -13,13 +16,22 @@ class StorePickupScreen2 extends StatefulWidget {
     this.orderDetail,
   });
 
-  NewOrder? orderDetail;
+  final NewOrder? orderDetail;
 
   @override
   State<StorePickupScreen2> createState() => _StorePickupScreen2State();
 }
 
 class _StorePickupScreen2State extends State<StorePickupScreen2> {
+  late NewOrder? orderListen;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize order with the value from widget.orderDetail
+    orderListen = widget.orderDetail;
+  }
+
   BuildContext? loadingDialogContext;
 
   String orderDateRead() {
@@ -29,45 +41,6 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
     return formattedOrderTime;
   }
 
-  //Popup Note
-  void showDialogNote() {
-    showDialog(context: context, builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Accept Order?'),
-        content: const Text(
-          'You are about to accept this order. Once you are successfully assigned as the rider, please proceed to the store.',
-          // textAlign: TextAlign.center,
-        ),
-        actions: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context); // Dismiss dialog on Cancel
-                },
-                child: const Text('Cancel'),
-              ),
-              const SizedBox(width: 20,),
-              ElevatedButton(
-                onPressed: _acceptOrder,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.inversePrimary,
-                ),
-                child: const Center(
-                  child: SizedBox(
-                    width: 40,
-                    child: Center(child: Text('Ok')),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      );
-    });
-  }
 
   void _acceptOrder() async {
     showDialog(
@@ -126,14 +99,51 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
 
   }
 
-  void showLoadingDialog() {
+  void showDialogPickUp() {
     // if(loadingDialogContext != null) return;
-
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         loadingDialogContext = context;
+
+        if(orderListen!.orderStatus == 'Assigned'){
+          return AlertDialog(
+            title: const Text('Start Pickup Route?'),
+            content: const Text(
+              'You’re about to start the route to pick up the order. Follow the directions to the store for pickup.'
+              // textAlign: TextAlign.center,
+            ),
+            actions: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Dismiss dialog on Cancel
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  const SizedBox(width: 20,),
+                  ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.inversePrimary,
+                    ),
+                    child: const Center(
+                      child: SizedBox(
+                        width: 40,
+                        child: Center(child: Text('Ok')),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        }
+
         return const AlertDialog(
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -148,6 +158,7 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
             ],
           ),
         );
+
       },
     );
   }
@@ -161,6 +172,7 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Order Details'),
@@ -195,8 +207,9 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
               }
 
               NewOrder order = NewOrder.fromJson(snapshot.data!.data() as Map<String, dynamic>);
+              orderListen = NewOrder.fromJson(snapshot.data!.data() as Map<String, dynamic>);
 
-              if (order.orderStatus == 'Order picked up! Your order is on its way!') {
+              if (order.orderStatus == 'Picked up') {
                 closeLoadingDialog();
 
                 WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -604,16 +617,44 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
                           itemCount: widget.orderDetail!.items!.length,
                           itemBuilder: (context, index) {
                             return ListTile(
-                              leading: Container(
+                              leading: SizedBox(
                                 height: 50,
                                 width: 50,
-                                decoration: BoxDecoration(
-                                  border: Border.all(),
-                                ),
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.image,
-                                    color: Colors.grey,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: order.items![index].itemImageURL != null
+                                      ? CachedNetworkImage(
+                                    imageUrl: '${order.items![index].itemImageURL}',
+                                    fit: BoxFit.fill,
+                                    placeholder: (context, url) => Shimmer.fromColors(
+                                      baseColor: Colors.grey[300]!,
+                                      highlightColor: Colors.grey[100]!,
+                                      child: Center(
+                                        child: Icon(
+                                          PhosphorIcons.image(
+                                              PhosphorIconsStyle.fill),
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        Container(
+                                          color: Colors.grey[200],
+                                          child: Icon(
+                                            PhosphorIcons.imageBroken(
+                                                PhosphorIconsStyle.fill),
+                                            color: Colors.grey,
+                                            size: 48,
+                                          ),
+                                        ),
+                                  )
+                                      : Container(
+                                    color: Colors.grey[200],
+                                    child: Icon(
+                                      PhosphorIcons.imageBroken(
+                                          PhosphorIconsStyle.fill),
+                                      color: Colors.grey,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -694,7 +735,6 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
               ),
             ),
           ),
-
         ],
       ),
       bottomNavigationBar: BottomAppBar(
@@ -702,10 +742,13 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
           height: 60,
           color: Colors.black,
           child: TextButton(
-            onPressed: showLoadingDialog,
-            child: const Text(
-              'Request Pickup Confirmation',
-              style: TextStyle(
+            onPressed: showDialogPickUp,
+            child: Text(
+              widget.orderDetail!.orderStatus == 'Assigned'
+              ? 'Start Pickup'
+              : widget.orderDetail!.orderStatus == 'Picking up'
+              ? 'Request Pickup Confirmation' : '',
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,
                 fontWeight: FontWeight.w500,

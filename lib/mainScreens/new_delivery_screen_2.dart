@@ -3,6 +3,7 @@ import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/mainScreens/inProgressScreens/in_progress_main_screen.dart';
 import 'package:delivery_service_riders/mainScreens/main_screen.dart';
 import 'package:delivery_service_riders/models/new_order.dart';
+import 'package:delivery_service_riders/services/geopoint_json.dart';
 import 'package:delivery_service_riders/widgets/loading_dialog.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
@@ -80,10 +81,12 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen2> {
 
     try {
       await orderDocument.update({
-        'orderStatus': 'Rider found! Picking the order from the store',
+        'orderStatus': 'Assigned',
         'riderID': sharedPreferences!.getString('uid'),
         'riderName': sharedPreferences!.getString('name'),
         'riderPhone': sharedPreferences!.getString('phone'),
+        'riderConfirmDelivery': false,
+        'riderLocation': parseGeoPointFromJson(sharedPreferences!.getString('location').toString()),
       });
 
       // Close the loading dialog
