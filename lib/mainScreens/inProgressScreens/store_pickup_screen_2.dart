@@ -3,9 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/mainScreens/main_screen.dart';
 import 'package:delivery_service_riders/models/new_order.dart';
+import 'package:delivery_service_riders/sample_features/MapModalSheet.dart';
+import 'package:delivery_service_riders/sample_features/live_location_tracking_page.dart';
+import 'package:delivery_service_riders/sample_features/map_screen.dart';
 import 'package:delivery_service_riders/widgets/loading_dialog.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
@@ -742,7 +746,23 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
           height: 60,
           color: Colors.black,
           child: TextButton(
-            onPressed: showDialogPickUp,
+            // onPressed: showDialogPickUp,
+            onPressed: () {
+              // showMapModalSheet(
+              //   context,
+              //   LatLng(9.8923637, 123.8769607),
+              //   LatLng(9.8926398, 123.8767662),
+              //   LatLng(9.8921513, 123.8769048),
+              // );
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => LiveLocationTrackingPage(
+                    destination: LatLng(9.8944923, 123.8831812), // Example destination
+                  ),
+                ),
+              );
+            },
             child: Text(
               widget.orderDetail!.orderStatus == 'Assigned'
               ? 'Start Pickup'

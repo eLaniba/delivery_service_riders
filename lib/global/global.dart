@@ -12,3 +12,6 @@ Color white80 = const Color.fromARGB(255, 238, 238, 238);
 Color white70 = const Color.fromARGB(255, 224, 224, 224);
 Color grey50 = const Color.fromARGB(255, 189, 195, 199);
 Color grey20 = const Color.fromARGB(255, 151, 154, 154);
+
+String apiKey = 'AIzaSyDN4P2wLPNtH9NqROqux8NVc2XaHGViO2U';
+

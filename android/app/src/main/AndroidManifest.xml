@@ -5,6 +5,11 @@
         android:label="delivery_service_riders"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDN4P2wLPNtH9NqROqux8NVc2XaHGViO2U"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
