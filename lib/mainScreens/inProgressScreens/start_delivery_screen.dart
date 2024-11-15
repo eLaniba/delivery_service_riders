@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/global/global.dart';
+import 'package:delivery_service_riders/mainScreens/inProgressScreens/start_delivery_screen_2.dart';
 import 'package:delivery_service_riders/models/new_order.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -22,7 +23,7 @@ class _StartDeliveryScreenState extends State<StartDeliveryScreen> {
           stream: FirebaseFirestore.instance
               .collection('active_orders')
               .where('riderID', isEqualTo: '${sharedPreferences!.get('uid')}')
-              .where('orderStatus', isEqualTo: 'Picked up')
+              .where('orderStatus', whereIn: ['Picked up', 'Delivering'])
               .orderBy('orderTime', descending: true)
               .snapshots(),
           builder: (context, orderSnapshot) {
@@ -40,7 +41,7 @@ class _StartDeliveryScreenState extends State<StartDeliveryScreen> {
                     elevation: 2,
                     child: InkWell(
                       onTap: (){
-                        // Navigator.push(context, MaterialPageRoute(builder: (c) => StorePickupScreen2(orderDetail: order,)));
+                        Navigator.push(context, MaterialPageRoute(builder: (c) => StartDeliveryScreen2(orderDetail: order,)));
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(8),
