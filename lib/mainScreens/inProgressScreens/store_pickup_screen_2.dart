@@ -45,65 +45,7 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
     return formattedOrderTime;
   }
 
-
-  void _acceptOrder() async {
-    showDialog(
-        context: context,
-        builder: (c) {
-          return const LoadingDialog(message: "Accepting order");
-        }
-    );
-
-    DocumentReference orderDocument = FirebaseFirestore.instance.collection('active_orders').doc('${widget.orderDetail!.orderID}');
-
-    try {
-      await orderDocument.update({
-        'orderStatus': 'Rider found! Picking the order from the store',
-        'riderID': sharedPreferences!.getString('uid'),
-        'riderName': sharedPreferences!.getString('name'),
-        'riderPhone': sharedPreferences!.getString('phone'),
-      });
-
-      // Close the loading dialog
-      Navigator.of(context).pop();
-
-      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 2, inProgressScreenIndex: 0)));
-
-      // Show a success Snackbar
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Order Accepted! Proceed to the store for pickup'),
-          backgroundColor: Colors.blue, // Optional: Set background color
-          duration: Duration(seconds: 5), // Optional: How long the snackbar is shown
-        ),
-      );
-
-    } catch (e) {
-      Navigator.of(context).pop();
-
-      // Show an error Snackbar if something goes wrong
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to accept order: $e'),
-          backgroundColor: Colors.red, // Optional: Set background color for error
-          duration: const Duration(seconds: 5), // Optional: How long the snackbar is shown
-        ),
-      );
-    }
-  }
-
-  void _requestPickupConfirmation() {
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (c) {
-          return const LoadingDialog(message: "Requesting confirmation from the store");
-        }
-    );
-
-  }
-
-  void showDialogPickUp() {
+  void showPickupDialog() {
     // if(loadingDialogContext != null) return;
     showDialog(
       context: context,
@@ -115,7 +57,7 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
           return AlertDialog(
             title: const Text('Start Pickup Route?'),
             content: const Text(
-              'You’re about to start the route to pick up the order. Follow the directions to the store for pickup.'
+                'You’re about to start the route to pick up the order. Follow the directions to the store for pickup.'
               // textAlign: TextAlign.center,
             ),
             actions: [
@@ -130,7 +72,10 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
                   ),
                   const SizedBox(width: 20,),
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      startPickingUpOrder();
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       foregroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -167,6 +112,50 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
     );
   }
 
+  Future<void> startPickingUpOrder() async {
+    showDialog(
+        context: context,
+        builder: (c) {
+          loadingDialogContext = context;
+          return const LoadingDialog(message: "Starting route");
+        }
+    );
+
+    DocumentReference orderDocument = FirebaseFirestore.instance.collection('active_orders').doc('${widget.orderDetail!.orderID}');
+    try {
+      await orderDocument.update({
+        'orderStatus': 'Picking up',
+      });
+
+      //Refresh the build for Bottom TextButton and AppBar Icon
+      setState(() {
+
+      });
+
+      closeLoadingDialog();
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LiveLocationTrackingPage(
+            order: widget.orderDetail!, // Example destination
+          ),
+        ),
+      );
+    } catch (e) {
+      closeLoadingDialog();
+
+      // Show an error Snackbar if something goes wrong
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to start route. Please try again'),
+          backgroundColor: Colors.red, // Optional: Set background color for error
+          duration: const Duration(seconds: 5), // Optional: How long the snackbar is shown
+        ),
+      );
+    }
+  }
+
   void closeLoadingDialog() {
     if (loadingDialogContext != null) {
       Navigator.of(loadingDialogContext!).pop();
@@ -176,19 +165,34 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Order Details'),
         actions: [
+          if(orderListen!.orderStatus == 'Picking up')
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LiveLocationTrackingPage(
+                      order: widget.orderDetail!, // Example destination
+                    ),
+                  ),
+                );
+              },
+              icon: Icon(PhosphorIcons.mapTrifold(PhosphorIconsStyle.regular)),
+            ),
+
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: IconButton(
               onPressed: () {},
-              icon: const Icon(Icons.help_outline_outlined),
+              icon: Icon(PhosphorIcons.question(PhosphorIconsStyle.regular)),
             ),
           ),
         ],
+
       ),
       backgroundColor: Colors.grey[200],
       body: Stack(
@@ -754,20 +758,12 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
               //   LatLng(9.8926398, 123.8767662),
               //   LatLng(9.8921513, 123.8769048),
               // );
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => LiveLocationTrackingPage(
-                    destination: LatLng(9.8944923, 123.8831812), // Example destination
-                  ),
-                ),
-              );
+              showPickupDialog();
             },
             child: Text(
-              widget.orderDetail!.orderStatus == 'Assigned'
-              ? 'Start Pickup'
-              : widget.orderDetail!.orderStatus == 'Picking up'
-              ? 'Request Pickup Confirmation' : '',
+              orderListen!.orderStatus == 'Picking up'
+              ? 'Request Pickup Confirmation'
+              : 'Start Pickup',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,

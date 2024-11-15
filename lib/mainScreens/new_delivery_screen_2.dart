@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/mainScreens/inProgressScreens/in_progress_main_screen.dart';
@@ -8,6 +9,8 @@ import 'package:delivery_service_riders/widgets/loading_dialog.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:shimmer/shimmer.dart';
 
 class NewDeliveryScreen2 extends StatefulWidget {
   NewDeliveryScreen2({
@@ -515,16 +518,44 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen2> {
                               itemCount: widget.orderDetail!.items!.length,
                               itemBuilder: (context, index) {
                                 return ListTile(
-                                  leading: Container(
+                                  leading: SizedBox(
                                     height: 50,
                                     width: 50,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(),
-                                    ),
-                                    child: const Center(
-                                      child: Icon(
-                                        Icons.image,
-                                        color: Colors.grey,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(4),
+                                      child: widget.orderDetail!.items![index].itemImageURL != null
+                                          ? CachedNetworkImage(
+                                        imageUrl: '${widget.orderDetail!.items![index].itemImageURL}',
+                                        fit: BoxFit.fill,
+                                        placeholder: (context, url) => Shimmer.fromColors(
+                                          baseColor: Colors.grey[300]!,
+                                          highlightColor: Colors.grey[100]!,
+                                          child: Center(
+                                            child: Icon(
+                                              PhosphorIcons.image(
+                                                  PhosphorIconsStyle.fill),
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            Container(
+                                              color: Colors.grey[200],
+                                              child: Icon(
+                                                PhosphorIcons.imageBroken(
+                                                    PhosphorIconsStyle.fill),
+                                                color: Colors.grey,
+                                                size: 48,
+                                              ),
+                                            ),
+                                      )
+                                          : Container(
+                                        color: Colors.grey[200],
+                                        child: Icon(
+                                          PhosphorIcons.imageBroken(
+                                              PhosphorIconsStyle.fill),
+                                          color: Colors.grey,
+                                        ),
                                       ),
                                     ),
                                   ),

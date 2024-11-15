@@ -24,7 +24,7 @@ class _StorePickupScreenState extends State<StorePickupScreen> {
           stream: FirebaseFirestore.instance
               .collection('active_orders')
               .where('riderID', isEqualTo: '${sharedPreferences!.get('uid')}')
-              .where('orderStatus', isEqualTo: 'Assigned')
+              .where('orderStatus', whereIn: ['Assigned', 'Picking up'])
               .orderBy('orderTime', descending: true)
               .snapshots(),
           builder: (context, orderSnapshot) {
