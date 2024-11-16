@@ -94,6 +94,18 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
           );
         }
 
+        //Update riderConfirmDelivery to true
+        if(orderListen!.riderConfirmDelivery == false) {
+          DocumentReference orderDocument = FirebaseFirestore.instance.collection('active_orders').doc('${widget.orderDetail!.orderID}');
+          try{
+            orderDocument.update({
+              'riderConfirmDelivery': true,
+            });
+          } catch(e) {
+            rethrow;
+          }
+        }
+
         return const AlertDialog(
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -102,7 +114,7 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
               CircularProgressIndicator(),
               SizedBox(height: 20,),
               Text(
-                "Requesting confirmation from the store, please wait...",
+                "Requesting confirmation from the customer, please wait...",
                 textAlign: TextAlign.center,
               ),
             ],
@@ -218,7 +230,7 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
               NewOrder order = NewOrder.fromJson(snapshot.data!.data() as Map<String, dynamic>);
               orderListen = NewOrder.fromJson(snapshot.data!.data() as Map<String, dynamic>);
 
-              if (order.orderStatus == 'Delivered') {
+              if (order.orderStatus == 'Delivered' && order.userConfirmDelivery == true) {
                 closeLoadingDialog();
 
                 WidgetsBinding.instance.addPostFrameCallback((_) {
