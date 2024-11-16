@@ -92,35 +92,52 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
               ),
             ],
           );
-        }
-
-        //Update riderConfirmDelivery to true
-        if(orderListen!.riderConfirmDelivery == false) {
-          DocumentReference orderDocument = FirebaseFirestore.instance.collection('active_orders').doc('${widget.orderDetail!.orderID}');
-          try{
-            orderDocument.update({
-              'riderConfirmDelivery': true,
-            });
-          } catch(e) {
-            rethrow;
-          }
-        }
-
-        return const AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 20,),
-              Text(
-                "Requesting confirmation from the customer, please wait...",
-                textAlign: TextAlign.center,
+        } else {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+            title: const Text(
+              'Request Confirmation?',
+              style: TextStyle(
+                fontSize: 20,
+              ),
+            ),
+            content: const Text(
+                "By pressing this button, you confirm that the customer has paid and received the items from the rider. \n\nPlease ensure all transactions are completed before confirming."              // textAlign: TextAlign.center,
+            ),
+            actions: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Dismiss dialog on Cancel
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  const SizedBox(width: 20,),
+                  ElevatedButton(
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      endDelivery();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.inversePrimary,
+                    ),
+                    child: const Center(
+                      child: SizedBox(
+                        width: 56,
+                        child: Center(child: Text('Confirm')),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
-          ),
-        );
-
+          );
+        }
       },
     );
   }
@@ -166,6 +183,35 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
           duration: const Duration(seconds: 5), // Optional: How long the snackbar is shown
         ),
       );
+    }
+  }
+
+  Future<void> endDelivery() async {
+    showDialog(context: context, builder: (BuildContext context) {
+      loadingDialogContext = context;
+      return const AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 20,),
+            Text(
+              "Requesting confirmation from the customer, please wait...",
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    });
+
+    DocumentReference orderDocument = FirebaseFirestore.instance.collection('active_orders').doc('${widget.orderDetail!.orderID}');
+    try{
+      await orderDocument.update({
+        'riderConfirmDelivery': true,
+      });
+    } catch(e) {
+      rethrow;
     }
   }
 
@@ -230,9 +276,9 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
               NewOrder order = NewOrder.fromJson(snapshot.data!.data() as Map<String, dynamic>);
               orderListen = NewOrder.fromJson(snapshot.data!.data() as Map<String, dynamic>);
 
-              if (order.orderStatus == 'Delivered' && order.userConfirmDelivery == true) {
-                closeLoadingDialog();
+              if (order.orderStatus == 'Delivered') {
 
+                closeLoadingDialog();
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   Future.delayed(const Duration(milliseconds: 100), () {
                     showDialog(
