@@ -1,3 +1,4 @@
+import 'package:delivery_service_riders/mainScreens/inProgressScreens/completing_screen.dart';
 import 'package:delivery_service_riders/mainScreens/inProgressScreens/start_delivery_screen.dart';
 import 'package:delivery_service_riders/mainScreens/inProgressScreens/store_pickup_screen.dart';
 import 'package:flutter/material.dart';
@@ -42,6 +43,7 @@ class _InProgressMainScreenState extends State<InProgressMainScreen> with Single
             Container(
               color: Colors.white,
               child: TabBar(
+                indicator: null,
                 controller: _tabController,
                 tabs: const [
                   Tab(text: 'Store Pickup',),
@@ -56,7 +58,7 @@ class _InProgressMainScreenState extends State<InProgressMainScreen> with Single
                 children: const [
                   StorePickupScreen(),
                   StartDeliveryScreen(),
-                  Placeholder(child: Center(child: Text('Completing'),),),
+                  CompletingScreen(),
                 ],
               ),
             ),

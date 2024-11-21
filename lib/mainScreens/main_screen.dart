@@ -2,6 +2,7 @@ import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/mainScreens/inProgressScreens/in_progress_main_screen.dart';
 import 'package:delivery_service_riders/mainScreens/new_delivery_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class MainScreen extends StatefulWidget {
   MainScreen({
@@ -46,6 +47,16 @@ class _MainScreenState extends State<MainScreen> {
       ),
       backgroundColor: Colors.grey[200],
       body: _screens[widget.mainScreenIndex],
+      floatingActionButton:
+        widget.mainScreenIndex == 2 // Check if the Products tab is selected
+            ? FloatingActionButton(
+                onPressed: () {
+
+                },
+                child: Icon(
+               PhosphorIcons.package(PhosphorIconsStyle.fill),
+          ),
+        ) : null,
       bottomNavigationBar: BottomNavigationBar(
         onTap: (index) {
           setState(() {

@@ -36,6 +36,9 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen2> {
   void showDialogNote() {
     showDialog(context: context, builder: (BuildContext context) {
       return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+        ),
         title: const Text('Accept Order?'),
         content: const Text(
           'You are about to accept this order. Once you are successfully assigned as the rider, please proceed to the store.',

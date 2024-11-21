@@ -8,6 +8,7 @@ import 'package:delivery_service_riders/sample_features/live_location_tracking_p
 import 'package:delivery_service_riders/sample_features/live_location_tracking_page_2.dart';
 import 'package:delivery_service_riders/sample_features/map_screen.dart';
 import 'package:delivery_service_riders/widgets/loading_dialog.dart';
+import 'package:delivery_service_riders/widgets/order_status_widget.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -15,8 +16,8 @@ import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
-class StartDeliveryScreen2 extends StatefulWidget {
-  StartDeliveryScreen2({
+class CompletingScreen2 extends StatefulWidget {
+  CompletingScreen2({
     super.key,
     this.orderDetail,
   });
@@ -24,13 +25,11 @@ class StartDeliveryScreen2 extends StatefulWidget {
   final NewOrder? orderDetail;
 
   @override
-  State<StartDeliveryScreen2> createState() => _StartDeliveryScreen2State();
+  State<CompletingScreen2> createState() => _CompletingScreen2State();
 }
 
-class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
+class _CompletingScreen2State extends State<CompletingScreen2> {
   late NewOrder? orderListen;
-  //loadingDialogContext - used for closing confirmation dialog, if exist
-  BuildContext? loadingDialogContext;
 
   @override
   void initState() {
@@ -39,6 +38,8 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
     orderListen = widget.orderDetail;
   }
 
+  BuildContext? loadingDialogContext;
+
   String orderDateRead() {
     DateTime orderTimeRead = widget.orderDetail!.orderTime!.toDate();
 
@@ -46,7 +47,7 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
     return formattedOrderTime;
   }
 
-  void showDeliveryDialog() {
+  void showRouteDialog() {
     // if(loadingDialogContext != null) return;
     showDialog(
       context: context,
@@ -54,11 +55,11 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
       builder: (BuildContext context) {
         loadingDialogContext = context;
 
-        if(orderListen!.orderStatus == 'Picked up'){
+        if(orderListen!.orderStatus == 'Delivered'){
           return AlertDialog(
-            title: const Text('Start Delivery Route?'),
+            title: const Text('Start Store Route?'),
             content: const Text(
-                'You’re about to start the route to deliver the order to the customer. Follow the directions to deliver it to the customer’s address.'
+                'You’re about to start the route back to the store. Follow the directions to deliver the payment to the store.'
               // textAlign: TextAlign.center,
             ),
             actions: [
@@ -75,7 +76,7 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
                   ElevatedButton(
                     onPressed: () async {
                       Navigator.pop(context);
-                      startDelivery();
+                      startRoute();
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
@@ -98,13 +99,13 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
               borderRadius: BorderRadius.circular(4),
             ),
             title: const Text(
-              'Request Confirmation?',
+              'Complete Order?',
               style: TextStyle(
                 fontSize: 20,
               ),
             ),
             content: const Text(
-                "By pressing this button, you confirm that the customer has paid and received the items from the rider. \n\nPlease ensure all transactions are completed before confirming."              // textAlign: TextAlign.center,
+                "By pressing this button, you confirm that you have successfully delivered the order to the customer and that the store owner has paid you for your delivery service.\n\nPlease ensure all transactions are completed before confirming."              // textAlign: TextAlign.center,
             ),
             actions: [
               Row(
@@ -120,7 +121,7 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
                   ElevatedButton(
                     onPressed: () async {
                       Navigator.pop(context);
-                      endDelivery();
+                      endOrder();
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
@@ -142,19 +143,19 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
     );
   }
 
-  Future<void> startDelivery() async {
+  Future<void> startRoute() async {
     showDialog(
         context: context,
         builder: (c) {
           loadingDialogContext = context;
-          return const LoadingDialog(message: "Setting up for delivery");
+          return const LoadingDialog(message: "Setting up route");
         }
     );
 
     DocumentReference orderDocument = FirebaseFirestore.instance.collection('active_orders').doc('${widget.orderDetail!.orderID}');
     try {
       await orderDocument.update({
-        'orderStatus': 'Delivering',
+        'orderStatus': 'Completing',
       });
 
       //Refresh the build for Bottom TextButton and AppBar Icon
@@ -186,7 +187,7 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
     }
   }
 
-  Future<void> endDelivery() async {
+  Future<void> endOrder() async {
     showDialog(context: context, builder: (BuildContext context) {
       loadingDialogContext = context;
       return const AlertDialog(
@@ -197,7 +198,7 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
             CircularProgressIndicator(),
             SizedBox(height: 20,),
             Text(
-              "Requesting confirmation from the customer, please wait...",
+              "Completing order, please wait...",
               textAlign: TextAlign.center,
             ),
           ],
@@ -206,9 +207,12 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
     });
 
     DocumentReference orderDocument = FirebaseFirestore.instance.collection('active_orders').doc('${widget.orderDetail!.orderID}');
+    DateTime now = DateTime.now();
+    Timestamp orderDelivered = Timestamp.fromDate(now);
+
     try{
       await orderDocument.update({
-        'riderConfirmDelivery': true,
+        'orderDelivered': orderDelivered,
       });
     } catch(e) {
       rethrow;
@@ -228,7 +232,7 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
       appBar: AppBar(
         title: const Text('Order Details'),
         actions: [
-          if(orderListen!.orderStatus == 'Delivering')
+          if(orderListen!.orderStatus == 'Completing')
             IconButton(
               onPressed: () {
                 Navigator.push(
@@ -276,7 +280,7 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
               NewOrder order = NewOrder.fromJson(snapshot.data!.data() as Map<String, dynamic>);
               orderListen = NewOrder.fromJson(snapshot.data!.data() as Map<String, dynamic>);
 
-              if (order.orderStatus == 'Delivered') {
+              if (order.orderStatus == 'Completed') {
                 closeLoadingDialog();
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   Future.delayed(const Duration(milliseconds: 100), () {
@@ -296,7 +300,11 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
                               ),
                               SizedBox(height: 20,),
                               Text(
-                                "Customer delivery confirmed. Return to the store to complete the order.",
+                                "Order Complete!",
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                "The order is complete. Thank you for your excellent service!",
                                 textAlign: TextAlign.center,
                               ),
                             ],
@@ -311,6 +319,7 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
                   Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 2, inProgressScreenIndex: 2)));
                 });
               }
+
               return SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
@@ -335,31 +344,7 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
                                 ),
                               ),
                               //Order Status
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                // crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(
-                                    child: Icon(
-                                      Icons.circle,
-                                      color: Colors.orange,
-                                      size: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    width: 8,
-                                  ),
-                                  Flexible(
-                                    child: Text(
-                                      '${order.orderStatus}',
-                                      style:const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              orderStatus(orderListen!.orderStatus.toString()),
                               const SizedBox(height: 4,),
                               //Order ID
                               RichText(
@@ -809,12 +794,12 @@ class _StartDeliveryScreen2State extends State<StartDeliveryScreen2> {
           child: TextButton(
             // onPressed: showDialogPickUp,
             onPressed: () {
-              showDeliveryDialog();
+              showRouteDialog();
             },
             child: Text(
-              orderListen!.orderStatus == 'Delivering'
-                  ? 'Request Delivery Confirmation'
-                  : 'Start Delivery',
+              orderListen!.orderStatus == 'Completing'
+                  ? 'Complete Order'
+                  : 'Start Store Route',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,

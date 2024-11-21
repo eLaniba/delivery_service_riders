@@ -55,6 +55,9 @@ class _StorePickupScreen2State extends State<StorePickupScreen2> {
 
         if(orderListen!.orderStatus == 'Assigned'){
           return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
             title: const Text('Start Pickup Route?'),
             content: const Text(
                 'You’re about to start the route to pick up the order. Follow the directions to the store for pickup.'
