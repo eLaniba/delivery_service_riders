@@ -26,7 +26,11 @@ class _MainScreenState extends State<MainScreen> {
     // TODO: implement initState
     super.initState();
     _screens = [
-      const Placeholder(child: Center(child: Text('My Profile'),),),
+      Container(
+        color: Colors.white,
+        height: double.infinity,
+        width: double.infinity,
+      ),
       const NewDeliveryScreen(),
       InProgressMainScreen(index: widget.inProgressScreenIndex,),
     ];
@@ -44,6 +48,8 @@ class _MainScreenState extends State<MainScreen> {
               : 'In Progress Delivery'
         ),
         automaticallyImplyLeading: false,
+        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).primaryColor,
       ),
       backgroundColor: Colors.grey[200],
       body: _screens[widget.mainScreenIndex],
@@ -64,17 +70,23 @@ class _MainScreenState extends State<MainScreen> {
           });
         },
         currentIndex: widget.mainScreenIndex,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_2_outlined),
+            icon: widget.mainScreenIndex == 0
+                ? Icon(PhosphorIcons.user(PhosphorIconsStyle.fill))
+                : Icon(PhosphorIcons.user(PhosphorIconsStyle.regular)),
             label: 'Profile',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.new_releases_outlined),
+            icon: widget.mainScreenIndex == 1
+                ? Icon(PhosphorIcons.boxArrowDown(PhosphorIconsStyle.fill))
+                : Icon(PhosphorIcons.boxArrowDown(PhosphorIconsStyle.regular)),
             label: 'New Delivery',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.directions_bike_outlined),
+            icon: widget.mainScreenIndex == 2
+                ? Icon(PhosphorIcons.path(PhosphorIconsStyle.fill))
+                : Icon(PhosphorIcons.path(PhosphorIconsStyle.regular)),
             label: 'In Progress',
           ),
         ],

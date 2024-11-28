@@ -344,7 +344,7 @@ class _CompletingScreen2State extends State<CompletingScreen2> {
                                 ),
                               ),
                               //Order Status
-                              orderStatus(orderListen!.orderStatus.toString()),
+                              orderStatusWidget(orderListen!.orderStatus.toString()),
                               const SizedBox(height: 4,),
                               //Order ID
                               RichText(

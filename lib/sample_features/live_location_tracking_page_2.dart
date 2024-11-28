@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/models/new_order.dart';
@@ -29,6 +31,8 @@ class _LiveLocationTrackingPage2State extends State<LiveLocationTrackingPage2> {
   List<LatLng> polylineCoordinates = [];
   Map<PolylineId, Polyline> polylines = {};
 
+  StreamSubscription<Position>? _positionStreamSubscription; // Track the subscription
+
   final String _mapStyle = '''
   [
     {
@@ -56,7 +60,13 @@ class _LiveLocationTrackingPage2State extends State<LiveLocationTrackingPage2> {
     super.initState();
     _setMarkers();
     _getCurrentLocation();
-    _createPolylines();
+    // _createPolylines();
+  }
+
+  @override
+  void dispose() {
+    _positionStreamSubscription?.cancel();  // Cancel the stream subscription
+    super.dispose();
   }
 
   void _onMapCreated(GoogleMapController controller) {
@@ -86,16 +96,18 @@ class _LiveLocationTrackingPage2State extends State<LiveLocationTrackingPage2> {
 
   Future<void> _getCurrentLocation() async {
     await Geolocator.requestPermission();
-    Geolocator.getPositionStream().listen((Position position) {
-      setState(() {
-        _currentPosition = position;
-        _currentLocationMarker = Marker(
-          markerId: MarkerId('currentLocation'),
-          position: LatLng(position.latitude, position.longitude),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-        );
-      });
-
+    _positionStreamSubscription = Geolocator.getPositionStream().listen((Position position) {
+      if (mounted) {
+        setState(() {
+          _currentPosition = position;
+          _currentLocationMarker = Marker(
+            markerId: MarkerId('currentLocation'),
+            position: LatLng(position.latitude, position.longitude),
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+          );
+          _createPolylines();
+        });
+      }
       _updateLocationInFirestore(position);
       _centerCameraOnAllLocations();
     });

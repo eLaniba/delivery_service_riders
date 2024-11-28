@@ -10,6 +10,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   sharedPreferences = await SharedPreferences.getInstance();
+  savedPickedUpOrderPop = await loadPickedUpOrdersPop();
+  savedDeliveredOrderPop = await loadDeliveredOrdersPop();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
-Widget orderStatus(String orderStatus) {
+Widget orderStatusWidget(String orderStatus) {
   if (orderStatus == 'Pending') {
     return Container(
       decoration: BoxDecoration(
@@ -133,7 +133,7 @@ Widget orderStatus(String orderStatus) {
         mainAxisSize: MainAxisSize.min, // Wraps tightly around the child
         children: [
           Icon(
-            PhosphorIcons.check(PhosphorIconsStyle.bold),
+            PhosphorIcons.arrowsClockwise(PhosphorIconsStyle.bold),
             color: Colors.white,
             size: 18,
           ),
@@ -181,7 +181,7 @@ Widget orderStatus(String orderStatus) {
         mainAxisSize: MainAxisSize.min, // Wraps tightly around the child
         children: [
           Icon(
-            PhosphorIcons.check(PhosphorIconsStyle.bold),
+            PhosphorIcons.arrowsClockwise(PhosphorIconsStyle.bold),
             color: Colors.white,
             size: 18,
           ),
@@ -242,7 +242,7 @@ Widget orderStatus(String orderStatus) {
       ),
     );
   }
-  else if (orderStatus == 'Complete') {
+  else if (orderStatus == 'Completed') {
     return Container(
       decoration: BoxDecoration(
         color: Colors.green,
@@ -259,7 +259,7 @@ Widget orderStatus(String orderStatus) {
           ),
           const SizedBox(width: 4.0), // Space between icon and text
           const Text(
-            "Complete ",
+            "Completed ",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
         ],

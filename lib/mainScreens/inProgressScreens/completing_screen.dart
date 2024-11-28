@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/mainScreens/inProgressScreens/start_delivery_screen_2.dart';
 import 'package:delivery_service_riders/models/new_order.dart';
+import 'package:delivery_service_riders/widgets/order_card.dart';
 import 'package:delivery_service_riders/widgets/order_status_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -39,184 +40,30 @@ class _CompletingScreenState extends State<CompletingScreen> {
                 delegate: SliverChildBuilderDelegate((context, index){
                   NewOrder order = NewOrder.fromJson(orderSnapshot.data!.docs[index].data()! as Map<String, dynamic>,);
 
-                  return Card(
-                    margin: const EdgeInsets.all(8),
-                    elevation: 2,
-                    child: InkWell(
-                      onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (c) => CompletingScreen2(orderDetail: order,)));
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            //Icon + Order Status
-                            orderStatus(order.orderStatus.toString()),
-                            //Icon + User Name
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                const SizedBox(
-                                  child: Icon(
-                                    Icons.person_2_outlined,
-                                    size: 16,
-                                  ),
-                                ),
-                                const SizedBox(width: 8,),
-                                Expanded(
-                                  child: RichText(
-                                    text: TextSpan(
-                                        children: [
-                                          TextSpan(
-                                            text: '${order.storeName}',
-                                            style: const TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          TextSpan(
-                                            text: ' ${order.storePhone}',
-                                            style: const TextStyle(
-                                              color: Colors.grey,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                        ]
-                                    ),
-                                  ),
-                                ),
-                                const Icon(Icons.arrow_forward_ios),
-                              ],
-                            ),
-                            //Item(s) Text
-                            const Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                // SizedBox(width: 12,),
-                                Text(
-                                  'Item(s)',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            //Vertical Scroll list of Items
-                            SizedBox(
-                              height: 150,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: order.items!.length,
-                                itemBuilder: (context, index) {
-                                  return Container(
-                                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                                    width: 100,
-                                    color: Colors.white,
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                          margin: const EdgeInsets.all(8),
-                                          // padding: const EdgeInsets.all(4),
-                                          height: 80,
-                                          width: 80,
-                                          color: Colors.grey[200],
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(8),
-                                            child: order.items![index].itemImageURL != null
-                                                ? CachedNetworkImage(
-                                              imageUrl: '${order.items![index].itemImageURL}',
-                                              fit: BoxFit.fill,
-                                              placeholder: (context, url) => Shimmer.fromColors(
-                                                baseColor: Colors.grey[300]!,
-                                                highlightColor: Colors.grey[100]!,
-                                                child: Center(
-                                                  child: Icon(
-                                                    PhosphorIcons.image(
-                                                        PhosphorIconsStyle.fill),
-                                                    color: Colors.grey,
-                                                  ),
-                                                ),
-                                              ),
-                                              errorWidget: (context, url, error) =>
-                                                  Container(
-                                                    color: Colors.grey[200],
-                                                    child: Icon(
-                                                      PhosphorIcons.imageBroken(
-                                                          PhosphorIconsStyle.fill),
-                                                      color: Colors.grey,
-                                                      size: 48,
-                                                    ),
-                                                  ),
-                                            )
-                                                : Container(
-                                              color: Colors.grey[200],
-                                              child: Icon(
-                                                PhosphorIcons.imageBroken(
-                                                    PhosphorIconsStyle.fill),
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        Flexible(
-                                          child: RichText(
-                                            text: TextSpan(
-                                                children: [
-                                                  TextSpan(
-                                                    text: '₱ ${order.items![index].itemPrice!.toStringAsFixed(2)}',
-                                                    style: const TextStyle(
-                                                      color: Colors.grey,
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                  TextSpan(
-                                                    text: ' x ${order.items![index].itemQnty}',
-                                                    style: const TextStyle(
-                                                      color: Colors.grey,
-                                                    ),
-                                                  ),
-                                                ]
-                                            ),
-                                          ),
-                                        ),
-                                        Flexible(
-                                          child: Text(
-                                            '₱ ${order.items![index].itemTotal!.toStringAsFixed(2)}',
-                                            style: const TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                            maxLines: 1,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
+                  return OrderCard(order: order);
                 },
                   childCount: orderSnapshot.data!.docs.length,
                 ),
               );
             } else {
               // return const SliverFillRemaining(child: Center(child: Text('No order yet.')));
-              return const SliverFillRemaining(
+              return SliverFillRemaining(
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(Icons.remove_shopping_cart_outlined),
-                      Text('You don\'t have any active delivery'),
+                      Icon(
+                        PhosphorIcons.empty(PhosphorIconsStyle.regular),
+                        size: 48,
+                        color: Colors.grey,
+                      ),
+                      const Text(
+                        'You don\'t have any active delivery',
+                        style: TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
                     ],
                   ),
                 ),
