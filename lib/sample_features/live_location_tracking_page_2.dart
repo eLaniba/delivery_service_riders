@@ -116,7 +116,7 @@ class _LiveLocationTrackingPage2State extends State<LiveLocationTrackingPage2> {
   Future<void> _updateLocationInFirestore(Position position) async {
     FirebaseFirestore.instance
         .collection('active_orders')
-        .doc(widget.order.storeID)
+        .doc(widget.order.orderID)
         .update({
       'riderLocation': GeoPoint(position.latitude, position.longitude),
     }).catchError((error) {
