@@ -58,6 +58,8 @@ dependencies:
   flutter_polyline_points: 2.0.0
   flutter_launcher_icons: ^0.14.1
   easy_stepper: ^0.8.5+1
+  mobkit_dashed_border: ^0.0.7
+  google_mlkit_text_recognition: ^0.14.0
 
 
 
@@ -88,6 +90,7 @@ flutter:
     - images/
     - assets/icons/location.png
     - assets/icons/square_rotated.png
+    - assets/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

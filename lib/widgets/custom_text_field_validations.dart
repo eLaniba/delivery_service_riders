@@ -52,4 +52,12 @@ String? validateLocation(String? value) {
   return null; // Return null if valid
 }
 
+// Validate Location in the Add New Address
+String? validateLocationNewAddress(String? value) {
+  if (value == null || value.isEmpty) {
+    return 'Please enter an address';
+  }
+  return null; // Return null if valid
+}
+
 

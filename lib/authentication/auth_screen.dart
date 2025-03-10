@@ -1,5 +1,7 @@
-import 'package:delivery_service_riders/authentication/login.dart';
-import 'package:delivery_service_riders/authentication/register.dart';
+
+import 'package:delivery_service_riders/authentication/login_screen.dart';
+import 'package:delivery_service_riders/mainScreens/main_screen.dart';
+import 'package:delivery_service_riders/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -10,28 +12,30 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
+  final AuthService _authService = AuthService();
+
+  void quickLogout() {
+    _authService.setLoginState(false);
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    quickLogout();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2, // Number of tabs
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Rider'),
-          centerTitle: true,
-          bottom: const TabBar(
-            tabs: [
-              Tab(icon: Icon(Icons.login),),
-              Tab(icon: Icon(Icons.person_add_alt_1_outlined),),
-            ],
-          ),
-        ),
-        body: const TabBarView(
-          children: [
-            Login(),
-            Register(),
-          ],
-        ),
-      ),
+    return FutureBuilder(
+      future: _authService.isLoggedIn(),
+      builder: (context, snapshot) {
+        if(snapshot.hasData && snapshot.data == true) {
+          return MainScreen(mainScreenIndex: 0, inProgressScreenIndex: 1,);
+        } else {
+          return const LoginScreen();
+        }
+      },
     );
   }
 }
