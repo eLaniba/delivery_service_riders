@@ -1,4 +1,3 @@
-
 import 'package:delivery_service_riders/authentication/login_screen.dart';
 import 'package:delivery_service_riders/mainScreens/main_screen.dart';
 import 'package:delivery_service_riders/services/auth_service.dart';
@@ -22,7 +21,8 @@ class _AuthScreenState extends State<AuthScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    quickLogout();
+    // TODO: quick logout for testing
+    // quickLogout();
   }
 
   @override

@@ -98,7 +98,7 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen2> {
       // Close the loading dialog
       Navigator.of(context).pop();
 
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 2, inProgressScreenIndex: 0)));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 1, inProgressScreenIndex: 0)));
 
       // Show a success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(

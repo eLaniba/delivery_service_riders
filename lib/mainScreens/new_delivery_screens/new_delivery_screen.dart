@@ -1,13 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:delivery_service_riders/mainScreens/new_delivery_screen_2.dart';
 import 'package:delivery_service_riders/models/new_order.dart';
 import 'package:delivery_service_riders/widgets/order_card.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
-import '../global/global.dart';
+import '../../global/global.dart';
 
 class NewDeliveryScreen extends StatefulWidget {
   const NewDeliveryScreen({super.key});

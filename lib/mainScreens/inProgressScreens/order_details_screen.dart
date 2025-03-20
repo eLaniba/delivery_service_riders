@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/mainScreens/main_screen.dart';
+import 'package:delivery_service_riders/mainScreens/messages_screens/messages_screen_2.dart';
 
 import 'package:delivery_service_riders/models/add_to_cart_item.dart';
 import 'package:delivery_service_riders/models/new_order.dart';
@@ -9,6 +10,7 @@ import 'package:delivery_service_riders/sample_features/live_location_tracking_p
 import 'package:delivery_service_riders/sample_features/live_location_tracking_page_2.dart';
 import 'package:delivery_service_riders/services/order_details_controller.dart';
 import 'package:delivery_service_riders/services/util.dart';
+import 'package:delivery_service_riders/widgets/error_dialog.dart';
 import 'package:delivery_service_riders/widgets/loading_dialog.dart';
 import 'package:delivery_service_riders/widgets/order_status_help.dart';
 import 'package:delivery_service_riders/widgets/order_status_widget.dart';
@@ -85,6 +87,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
     });
   }
+
   void completeOrderDialog() {
     showDialog(
       context: context,
@@ -153,6 +156,16 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     );
   }
 
+  void sendMessage(String name, String id, String imageURL, String role) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MessagesScreen2(
+            partnerName: name, partnerID: id, imageURL: imageURL, partnerRole: role,),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if(widget.order != null) {
@@ -176,6 +189,27 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   NewOrder order = NewOrder.fromJson(
                     orderSnapshot.data!.data() as Map<String, dynamic>,
                   );
+
+                  //Close the Order Details Screen if not your order
+                  if(order.riderID != null && order.riderID != sharedPreferences!.getString('uid')) {
+                    // Delay the showing of the dialog until the current frame is rendered.
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => const ErrorDialog(message: "Order already taken."),
+                      ).then((_) {
+                        // Also delay the Navigator.pushAndRemoveUntil to ensure no conflicts.
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (_) => MainScreen(mainScreenIndex: 0, inProgressScreenIndex: 0)),
+                                (route) => false,
+                          );
+                        });
+                      });
+                    });
+                  }
 
                   if(orderStatusRoute.contains(order.orderStatus)) {
                     return IconButton(
@@ -260,6 +294,11 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
                     // Check if there's an Assigned Rider
                     bool hasRiderInfo = order.riderName != null && order.riderPhone != null;
+                    if(hasRiderInfo) {
+                      debugPrint('YES SURRRR');
+                    } else {
+                      debugPrint('NO SIRRRRR');
+                    }
 
                     return Column(
                       mainAxisSize: MainAxisSize.min,
@@ -313,22 +352,38 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 },
               ),
               const SizedBox(height: 4,),
-              //User Information
-              storeUserInfoContainer(
-                context: context,
-                icon: PhosphorIcons.mapPin(PhosphorIconsStyle.bold),
-                name: widget.order!.userName!,
-                phone: widget.order!.userPhone!,
-                address: widget.order!.userAddress!,
-              ),
-              const SizedBox(height: 4,),
               //Store Information
               storeUserInfoContainer(
                 context: context,
+                onTap: () {
+                  sendMessage(
+                    widget.order!.storeName!,
+                    widget.order!.storeID!,
+                    widget.order!.storeProfileURL!,
+                    'store',
+                  );
+                },
                 icon: PhosphorIcons.storefront(PhosphorIconsStyle.bold),
                 name: widget.order!.storeName!,
-                phone: widget.order!.storePhone!,
+                phone: reformatPhoneNumber(widget.order!.storePhone!),
                 address: widget.order!.storeAddress!,
+              ),
+              const SizedBox(height: 4,),
+              //User Information
+              storeUserInfoContainer(
+                onTap: () {
+                  sendMessage(
+                    widget.order!.userName!,
+                    widget.order!.userID!,
+                    widget.order!.userProfileURL!,
+                    'user',
+                  );
+                },
+                context: context,
+                icon: PhosphorIcons.user(PhosphorIconsStyle.bold),
+                name: widget.order!.userName!,
+                phone: reformatPhoneNumber( widget.order!.userPhone!),
+                address: widget.order!.userAddress!,
               ),
               const SizedBox(height: 4,),
               //Payment Method
@@ -493,54 +548,57 @@ Widget orderInfoContainer({BuildContext? context, required String orderStatus,re
   );
 }
 
-Widget storeUserInfoContainer({BuildContext? context, required IconData icon, required String name, required String phone, required String address}) {
-  return Container(
-    padding: const EdgeInsets.all(16),
-    color: Colors.white,
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        //Icon
-        Icon(
-          icon,
-          size: 24,
-          color: Theme.of(context!).primaryColor,
-        ),
-        const SizedBox(width: 16,),
-        //User/Store Name, User/Store Phone, User/Store Address
-        Flexible(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              //Name
-              Text(
-                name,
-                style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold
-                ),
-              ),
-              //Phone
-              Text(
-                phone,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: gray,
-                ),
-              ),
-              //Address
-              Text(
-                address,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: gray,
-                ),
-              ),
-            ],
+Widget storeUserInfoContainer({BuildContext? context, required IconData icon, required String name, required String phone, required String address, VoidCallback? onTap}) {
+  return InkWell(
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.all(16),
+      color: Colors.white,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          //Icon
+          Icon(
+            icon,
+            size: 24,
+            color: Theme.of(context!).primaryColor,
           ),
-        ),
-      ],
+          const SizedBox(width: 16,),
+          //User/Store Name, User/Store Phone, User/Store Address
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                //Name
+                Text(
+                  name,
+                  style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold
+                  ),
+                ),
+                //Phone
+                Text(
+                  phone,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: gray,
+                  ),
+                ),
+                //Address
+                Text(
+                  address,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: gray,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     ),
   );
 }

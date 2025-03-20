@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/mainScreens/inProgressScreens/in_progress_main_screen.dart';
-import 'package:delivery_service_riders/mainScreens/new_delivery_screen.dart';
+import 'package:delivery_service_riders/mainScreens/messages_screens/messages_screen.dart';
+import 'package:delivery_service_riders/mainScreens/new_delivery_screens/new_delivery_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -26,13 +28,13 @@ class _MainScreenState extends State<MainScreen> {
     // TODO: implement initState
     super.initState();
     _screens = [
+      const NewDeliveryScreen(),
+      InProgressMainScreen(index: widget.inProgressScreenIndex,),
       Container(
         color: Colors.white,
         height: double.infinity,
         width: double.infinity,
       ),
-      const NewDeliveryScreen(),
-      InProgressMainScreen(index: widget.inProgressScreenIndex,),
     ];
   }
 
@@ -42,19 +44,104 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: Text(
           widget.mainScreenIndex == 0
-              ? '${sharedPreferences!.getString('name')}'
-              : widget.mainScreenIndex == 1
               ? 'New Delivery'
-              : 'In Progress Delivery'
+              : widget.mainScreenIndex == 1
+              ? 'In Progress Delivery'
+              : '${sharedPreferences!.getString('name')}'
         ),
         automaticallyImplyLeading: false,
         foregroundColor: Colors.white,
         backgroundColor: Theme.of(context).primaryColor,
+        actions: [
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('users')
+                .doc('${sharedPreferences!.get('uid')}')
+                .collection('cart')
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(),
+                );
+              } else if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+                return Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(builder: (context) => const CartScreen()),
+                        // );
+                      },
+                      icon: Icon(PhosphorIcons.bell()),
+                    ),
+                    Positioned(
+                      right: 10,
+                      top: 5,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 8,
+                          minHeight: 8,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              } else {
+                return Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(builder: (c) => const CartScreen()),
+                        // );
+                      },
+                      icon: Icon(PhosphorIcons.bell()),
+                    ),
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+            },
+          ),
+          //Chat Screen
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MessagesScreen()),
+              );
+            },
+            icon: Icon(PhosphorIcons.chatText()),
+          ),
+        ],
       ),
       backgroundColor: Colors.grey[200],
       body: _screens[widget.mainScreenIndex],
       floatingActionButton:
-        widget.mainScreenIndex == 2 // Check if the Products tab is selected
+        widget.mainScreenIndex == 1 // Check if the Products tab is selected
             ? FloatingActionButton(
                 onPressed: () {
 
@@ -73,21 +160,21 @@ class _MainScreenState extends State<MainScreen> {
         items: [
           BottomNavigationBarItem(
             icon: widget.mainScreenIndex == 0
-                ? Icon(PhosphorIcons.user(PhosphorIconsStyle.fill))
-                : Icon(PhosphorIcons.user(PhosphorIconsStyle.regular)),
-            label: 'Profile',
-          ),
-          BottomNavigationBarItem(
-            icon: widget.mainScreenIndex == 1
                 ? Icon(PhosphorIcons.boxArrowDown(PhosphorIconsStyle.fill))
                 : Icon(PhosphorIcons.boxArrowDown(PhosphorIconsStyle.regular)),
             label: 'New Delivery',
           ),
           BottomNavigationBarItem(
-            icon: widget.mainScreenIndex == 2
+            icon: widget.mainScreenIndex == 1
                 ? Icon(PhosphorIcons.path(PhosphorIconsStyle.fill))
                 : Icon(PhosphorIcons.path(PhosphorIconsStyle.regular)),
             label: 'In Progress',
+          ),
+          BottomNavigationBarItem(
+            icon: widget.mainScreenIndex == 2
+                ? Icon(PhosphorIcons.user(PhosphorIconsStyle.fill))
+                : Icon(PhosphorIcons.user(PhosphorIconsStyle.regular)),
+            label: 'Profile',
           ),
         ],
       ),

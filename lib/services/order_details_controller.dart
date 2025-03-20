@@ -355,52 +355,117 @@ Future<void> confirmSuccessDialog({required BuildContext context, required Strin
   );
 }
 
+// void _acceptOrder(BuildContext context, NewOrder order) async {
+//   DocumentReference orderDocument = firebaseFirestore
+//       .collection('active_orders')
+//       .doc('${order.orderID}');
+//
+//   try {
+//     await orderDocument.update({
+//       'orderStatus': 'Assigned',
+//       'riderID': sharedPreferences!.getString('uid'),
+//       'riderName': sharedPreferences!.getString('name'),
+//       'riderPhone': sharedPreferences!.getString('phone'),
+//       'riderConfirmDelivery': false,
+//       'riderLocation': parseGeoPointFromJson(sharedPreferences!.getString('location').toString()),
+//     });
+//
+//     // Close the loading dialog
+//     Navigator.of(context).pop();
+//     Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 2, inProgressScreenIndex: 0)));
+//
+//     WidgetsBinding.instance.addPostFrameCallback((_) {
+//       Future.delayed(const Duration(milliseconds: 500), () {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           const SnackBar(
+//             content: Text('Order Accepted! Proceed to the store for pickup'),
+//             backgroundColor: Colors.blue, // Optional: Set background color
+//             duration: Duration(seconds: 5), // Optional: How long the snackbar is shown
+//           ),
+//         );
+//       });
+//     });
+//   }catch(e) {
+//     // Close the loading dialog
+//     Navigator.of(context).pop();
+//     WidgetsBinding.instance.addPostFrameCallback((_) {
+//       Future.delayed(const Duration(milliseconds: 500), () {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(
+//             content: Text('Failed to accept order: $e'),
+//             backgroundColor: Colors.red, // Optional: Set background color for error
+//             duration: const Duration(seconds: 5), // Optional: How long the snackbar is shown
+//           ),
+//         );
+//       });
+//     });
+//   }
+// }
+
 void _acceptOrder(BuildContext context, NewOrder order) async {
   DocumentReference orderDocument = firebaseFirestore
       .collection('active_orders')
       .doc('${order.orderID}');
 
   try {
-    await orderDocument.update({
-      'orderStatus': 'Assigned',
-      'riderID': sharedPreferences!.getString('uid'),
-      'riderName': sharedPreferences!.getString('name'),
-      'riderPhone': sharedPreferences!.getString('phone'),
-      'riderConfirmDelivery': false,
-      'riderLocation': parseGeoPointFromJson(sharedPreferences!.getString('location').toString()),
+    await firebaseFirestore.runTransaction((transaction) async {
+      DocumentSnapshot snapshot = await transaction.get(orderDocument);
+
+      // Check if the order is still available
+      if (snapshot.get('orderStatus') != 'Waiting') {
+        throw Exception('Order already accepted');
+      }
+
+      transaction.update(orderDocument, {
+        'orderStatus': 'Assigned',
+        'riderID': sharedPreferences!.getString('uid'),
+        'riderName': sharedPreferences!.getString('name'),
+        'riderPhone': sharedPreferences!.getString('phone'),
+        'riderConfirmDelivery': false,
+        'riderLocation': parseGeoPointFromJson(sharedPreferences!.getString('location').toString()),
+      });
     });
 
-    // Close the loading dialog
+    // Continue with success actions...
     Navigator.of(context).pop();
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 2, inProgressScreenIndex: 0)));
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 1, inProgressScreenIndex: 0)));
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.delayed(const Duration(milliseconds: 500), () {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Order Accepted! Proceed to the store for pickup'),
-            backgroundColor: Colors.blue, // Optional: Set background color
+            backgroundColor: Colors.green, // Optional: Set background color
             duration: Duration(seconds: 5), // Optional: How long the snackbar is shown
           ),
         );
       });
     });
-  }catch(e) {
-    // Close the loading dialog
+
+  } catch (e) {
+    //Close loading dialog
     Navigator.of(context).pop();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(milliseconds: 500), () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to accept order: $e'),
-            backgroundColor: Colors.red, // Optional: Set background color for error
-            duration: const Duration(seconds: 5), // Optional: How long the snackbar is shown
-          ),
-        );
-      });
-    });
+
+    if(e.toString().contains('Order already accepted')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Order already assigned by another rider'),
+          backgroundColor: Colors.red, // Optional: Set background color
+          duration: Duration(seconds: 5), // Optional: How long the snackbar is shown
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unknown error occurred, please try again'),
+          backgroundColor: Colors.red, // Optional: Set background color
+          duration: Duration(seconds: 5), // Optional: How long the snackbar is shown
+        ),
+      );
+    }
   }
 }
+
 void _requestDeliveryConfirmation(BuildContext context, NewOrder order) async {
   DocumentReference orderDocument = firebaseFirestore
       .collection('active_orders')

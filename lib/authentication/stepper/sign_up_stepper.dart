@@ -106,16 +106,16 @@ class _SignUpStepperState extends State<SignUpStepper> {
       //Step 1: Assigning Filenames
       String idFileName = 'id_file';
       String driverFileName = 'driver_file';
-      String imgFileName = 'img_file';
+      String profileFileName = 'profile_file';
 
       String idImagePath = 'riders/${currentUser.uid}/documents/$idFileName';
       String driverImagePath = 'riders/${currentUser.uid}/documents/$driverFileName';
-      String imgFilePath = 'riders/${currentUser.uid}/images/$imgFileName';
+      String profileFilePath = 'riders/${currentUser.uid}/images/$profileFileName';
 
       //Step 2: Upload images to Cloud Storage
       String idURL = await uploadFileAndGetDownloadURL(file: _idFile!, storagePath: idImagePath);
       String driverURL = await uploadFileAndGetDownloadURL(file: _driverFile!, storagePath: driverImagePath);
-      String imgURL = await uploadFileAndGetDownloadURL(file: _imgFile!, storagePath: imgFilePath);
+      String profileURL = await uploadFileAndGetDownloadURL(file: _imgFile!, storagePath: profileFilePath);
 
       //Step 3: Update Firebase Firestore Document
       await storeDocument.update({
@@ -123,8 +123,8 @@ class _SignUpStepperState extends State<SignUpStepper> {
         'idPath': idImagePath,
         'driverURL': driverURL,
         'driverPath': driverImagePath,
-        'riderImageURL': imgURL,
-        'riderImagePath ': imgFilePath,
+        'riderProfileURL': profileURL,
+        'riderProfilePath ': profileFilePath,
       });
 
       // Save geoPoint data locally

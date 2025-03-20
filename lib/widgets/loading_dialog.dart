@@ -11,6 +11,9 @@ class LoadingDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
       key: key,
       content: Column(
         mainAxisSize: MainAxisSize.min,

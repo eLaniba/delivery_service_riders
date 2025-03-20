@@ -199,11 +199,11 @@ class _LoginScreenState extends State<LoginScreen> {
     await sharedPreferences!.setString("uid", currentUser.uid);
     await sharedPreferences!.setString("email", riderData["riderEmail"].toString());
     await sharedPreferences!.setString("name", riderData["riderName"].toString());
-    await sharedPreferences!.setString("imageUrl", riderData["riderImagerURL"].toString());
+    await sharedPreferences!.setString("profileURL", riderData["riderProfileURL"].toString());
     await sharedPreferences!.setString("location", locationString);
 
     // Navigate to the main screen
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 0, inProgressScreenIndex: 2,)));
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 0, inProgressScreenIndex: 0,)));
   }
 
   @override
