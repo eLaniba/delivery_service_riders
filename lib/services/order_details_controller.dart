@@ -418,6 +418,7 @@ void _acceptOrder(BuildContext context, NewOrder order) async {
 
       transaction.update(orderDocument, {
         'orderStatus': 'Assigned',
+        'riderProfileURL': sharedPreferences!.getString('profileURL'),
         'riderID': sharedPreferences!.getString('uid'),
         'riderName': sharedPreferences!.getString('name'),
         'riderPhone': sharedPreferences!.getString('phone'),

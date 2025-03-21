@@ -82,7 +82,7 @@ class PartnerListTile extends StatelessWidget {
             height: 15,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: unreadCount > 0 ? Colors.red : gray.withOpacity(.5),
+              color: unreadCount > 0 ? Colors.blue : gray.withOpacity(.5),
             ),
           ),
           onTap: onTap,
