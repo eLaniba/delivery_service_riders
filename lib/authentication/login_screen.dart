@@ -3,6 +3,7 @@ import 'package:delivery_service_riders/authentication/auth_screen.dart';
 import 'package:delivery_service_riders/authentication/email_verification_page.dart';
 import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/mainScreens/main_screen.dart';
+import 'package:delivery_service_riders/services/auth_service.dart';
 import 'package:delivery_service_riders/services/geopoint_json.dart';
 import 'package:delivery_service_riders/widgets/custom_text_field.dart';
 import 'package:delivery_service_riders/widgets/custom_text_field_validations.dart';
@@ -19,6 +20,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  //AuthService class (see services/auth_service.dart)
+  final AuthService _authService = AuthService();
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -199,11 +203,51 @@ class _LoginScreenState extends State<LoginScreen> {
     await sharedPreferences!.setString("uid", currentUser.uid);
     await sharedPreferences!.setString("email", riderData["riderEmail"].toString());
     await sharedPreferences!.setString("name", riderData["riderName"].toString());
+    await sharedPreferences!.setString("phone", riderData["riderPhone"].toString());
     await sharedPreferences!.setString("profileURL", riderData["riderProfileURL"].toString());
     await sharedPreferences!.setString("location", locationString);
+    //Saving login state locally so user don't have to re-login if the app exit
+    await _authService.setLoginState(true);
+
+    // NEW: Store the FCM token in Firestore
+    await _storeFcmToken(currentUser.uid);
 
     // Navigate to the main screen
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 0, inProgressScreenIndex: 0,)));
+  }
+
+  /// NEW: A separate function to retrieve and store the FCM token
+  Future<void> _storeFcmToken(String riderId) async {
+    try {
+      // Retrieve the FCM token from the device
+      String? fcmToken = await firebaseMessaging.getToken();
+      if (fcmToken != null) {
+        // Create a new document with an Auto-generated ID
+        await firebaseFirestore
+            .collection('riders')
+            .doc(riderId)
+            .collection('tokens')
+            .add({
+          'token': fcmToken,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+
+        // Optional: Handle token refresh explicitly
+        firebaseMessaging.onTokenRefresh.listen((newToken) async {
+          // Add the new token as another document
+          await firebaseFirestore
+              .collection('riders')
+              .doc(riderId)
+              .collection('tokens')
+              .add({ // Auto ID again explicitly
+            'token': newToken,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+        });
+      }
+    } catch (e) {
+      print("Error storing FCM token: $e");
+    }
   }
 
   @override
@@ -213,7 +257,6 @@ class _LoginScreenState extends State<LoginScreen> {
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset(
                 'assets/delivery.png',

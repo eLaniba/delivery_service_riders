@@ -60,6 +60,7 @@ dependencies:
   easy_stepper: ^0.8.5+1
   mobkit_dashed_border: ^0.0.7
   google_mlkit_text_recognition: ^0.14.0
+  firebase_messaging: ^15.2.4
 
 
 

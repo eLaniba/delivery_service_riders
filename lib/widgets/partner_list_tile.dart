@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/models/chat.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
 class PartnerListTile extends StatelessWidget {
@@ -29,6 +30,8 @@ class PartnerListTile extends StatelessWidget {
     final lastSender = chat.lastSender ?? '';
     // If the last sender is the current user, prefix "You: " to the last message.
     final displayMessage = (lastSender == currentUserId) ? "You: $lastMessage" : lastMessage;
+    // Format the timestamp if available.
+    final String formattedTime = chat.timestamp != null ? DateFormat.jm().format(chat.timestamp!) : '';
 
     return Column(
       children: [
@@ -68,21 +71,38 @@ class PartnerListTile extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          subtitle: Text(
-            displayMessage,
-            style: TextStyle(
-              color: unreadCount > 0 ? Colors.black : gray,
-              fontWeight: unreadCount > 0 ? FontWeight.bold : FontWeight.normal,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          subtitle: Row(
+            children: [
+              // The message text expands to fill the space and truncates if needed.
+              Expanded(
+                child: Text(
+                  displayMessage,
+                  style: TextStyle(
+                    color: unreadCount > 0 ? Colors.black : gray,
+                    fontWeight: unreadCount > 0 ? FontWeight.bold : FontWeight.normal,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              // The time text remains visible on the right.
+              Text(
+                formattedTime,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: unreadCount > 0 ? Colors.black : gray,
+                  fontWeight: unreadCount > 0 ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ],
           ),
           trailing: Container(
             width: 15,
             height: 15,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: unreadCount > 0 ? Colors.blue : gray.withOpacity(.5),
+              color: unreadCount > 0 ? Colors.red : gray.withOpacity(.5),
             ),
           ),
           onTap: onTap,

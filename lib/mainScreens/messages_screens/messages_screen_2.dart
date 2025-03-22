@@ -129,7 +129,7 @@ class _MessagesScreen2State extends State<MessagesScreen2> {
     //   }
     // });
 
-    _scrollToBottom();
+    // _scrollToBottom();
   }
 
   /// Upload and send image message using the given image file.
