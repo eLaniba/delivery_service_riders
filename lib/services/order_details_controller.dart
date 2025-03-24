@@ -130,7 +130,7 @@ orderDetailsController({required BuildContext context, required NewOrder order})
 
         // Navigate to Start Delivery Page
         Future.delayed(const Duration(seconds: 3), () {
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 2, inProgressScreenIndex: 1)));
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 1, inProgressScreenIndex: 1)));
           // Navigator.of(context).pop();
         });
       });
@@ -184,7 +184,7 @@ orderDetailsController({required BuildContext context, required NewOrder order})
 
         // Navigate to Start Delivery Page
         Future.delayed(const Duration(seconds: 3), () {
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 2, inProgressScreenIndex: 2)));
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 1, inProgressScreenIndex: 2)));
           // Navigator.of(context).pop();
         });
       });

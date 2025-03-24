@@ -1,4 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:delivery_service_riders/global/global.dart';
+import 'package:delivery_service_riders/services/image_picker_service.dart';
+import 'package:delivery_service_riders/services/util.dart';
+import 'package:delivery_service_riders/widgets/confirmation_dialog.dart';
+import 'package:delivery_service_riders/widgets/show_floating_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 
 class CustomTextField extends StatefulWidget {
   CustomTextField({
@@ -27,8 +35,6 @@ class CustomTextField extends StatefulWidget {
 }
 
 class _CustomTextFieldState extends State<CustomTextField> {
-
-
   @override
   Widget build(BuildContext context) {
     return TextFormField(
@@ -52,6 +58,13 @@ class _CustomTextFieldState extends State<CustomTextField> {
             width: 1.5, // Thinner focused border
           ),
           borderRadius: BorderRadius.circular(24), // Slightly smaller radius for a more compact look
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
+            width: 1.5,
+          ),
+          borderRadius: BorderRadius.circular(24),
         ),
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(

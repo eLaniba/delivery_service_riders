@@ -3,6 +3,7 @@ import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/mainScreens/inProgressScreens/in_progress_main_screen.dart';
 import 'package:delivery_service_riders/mainScreens/messages_screens/messages_screen.dart';
 import 'package:delivery_service_riders/mainScreens/new_delivery_screens/new_delivery_screen.dart';
+import 'package:delivery_service_riders/mainScreens/profile_screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -30,11 +31,7 @@ class _MainScreenState extends State<MainScreen> {
     _screens = [
       const NewDeliveryScreen(),
       InProgressMainScreen(index: widget.inProgressScreenIndex,),
-      Container(
-        color: Colors.white,
-        height: double.infinity,
-        width: double.infinity,
-      ),
+      const ProfileScreen(),
     ];
   }
 

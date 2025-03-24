@@ -61,6 +61,8 @@ dependencies:
   mobkit_dashed_border: ^0.0.7
   google_mlkit_text_recognition: ^0.14.0
   firebase_messaging: ^15.2.4
+  fl_chart: ^0.70.2
+  provider: ^6.1.2
 
 
 

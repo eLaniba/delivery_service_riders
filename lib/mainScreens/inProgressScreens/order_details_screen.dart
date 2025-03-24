@@ -294,11 +294,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
                     // Check if there's an Assigned Rider
                     bool hasRiderInfo = order.riderName != null && order.riderPhone != null;
-                    if(hasRiderInfo) {
-                      debugPrint('YES SURRRR');
-                    } else {
-                      debugPrint('NO SIRRRRR');
-                    }
 
                     return Column(
                       mainAxisSize: MainAxisSize.min,
@@ -324,7 +319,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                           riderInfoContainer(
                             context: context,
                             icon: PhosphorIcons.moped(PhosphorIconsStyle.bold),
-                            name: order.riderName!,
+                            name: '${order.riderName!} (You)',
                             phone: order.riderPhone!,
                           ),
                         ]

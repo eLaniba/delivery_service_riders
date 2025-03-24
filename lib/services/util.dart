@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:delivery_service_riders/global/global.dart';
+import 'package:delivery_service_riders/models/sales.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -86,4 +87,12 @@ Future<bool> validateImage(XFile imageFile, String phrase) async {
   } finally {
     textRecognizer.close();
   }
+}
+
+double calculateServiceFeeTotal(List<Sales> sales) {
+  return sales.fold(0.0, (sum, sale) => sum + sale.serviceFeeTotal);
+}
+
+double calculateTotalEarnings(List<Sales> sales) {
+  return sales.fold(0.0, (sum, sale) => sum + sale.earnings);
 }
