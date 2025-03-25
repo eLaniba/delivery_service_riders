@@ -3,7 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/authentication/auth_screen.dart';
 import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/mainScreens/profile_screens/edit_profile_screen.dart';
-import 'package:delivery_service_riders/mainScreens/profile_screens/sales_screen.dart';
+import 'package:delivery_service_riders/mainScreens/profile_screens/earnings_screen.dart';
+import 'package:delivery_service_riders/mainScreens/profile_screens/order_history_screen.dart';
 import 'package:delivery_service_riders/models/riders.dart';
 import 'package:delivery_service_riders/services/auth_service.dart';
 import 'package:delivery_service_riders/services/util.dart';
@@ -144,7 +145,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         title: const Text('Earnings'),
                         trailing: PhosphorIcon(PhosphorIcons.caretRight(PhosphorIconsStyle.regular),),
                         onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => EarningsScreen(storeID: sharedPreferences!.getString('uid')!,)));
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => EarningsScreen(riderID: sharedPreferences!.getString('uid')!,)));
                         },
                       ),
                     ],
@@ -166,12 +167,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         title: const Text('Order History'),
                         trailing: PhosphorIcon(PhosphorIcons.caretRight(PhosphorIconsStyle.regular),),
                         onTap: () {
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => const AddressScreen(),
-                          //   ),
-                          // );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const OrderHistoryScreen(),
+                            ),
+                          );
                         },
                       ),
                       Divider(

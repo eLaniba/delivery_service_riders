@@ -226,7 +226,7 @@ orderDetailsController({required BuildContext context, required NewOrder order})
 
     //Show Confirm Success Dialog
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(milliseconds: 500), () {
+      Future.delayed(const Duration(seconds: 1), () {
         confirmSuccessDialog(
           context: context,
           message: "The order is complete. Thank you for your excellent service!",
@@ -235,7 +235,7 @@ orderDetailsController({required BuildContext context, required NewOrder order})
 
       // Navigate to Start Delivery Page
       Future.delayed(const Duration(seconds: 3), () {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 2, inProgressScreenIndex: 2)));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 1, inProgressScreenIndex: 2)));
         // Navigator.of(context).pop();
       });
     });
@@ -332,7 +332,7 @@ Future<void> confirmSuccessDialog({required BuildContext context, required Strin
     builder: (BuildContext context) {
       return AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(8),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
