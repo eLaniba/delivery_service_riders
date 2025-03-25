@@ -1,17 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/models/new_order.dart';
 import 'package:delivery_service_riders/widgets/order_card.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
-class NewDeliveryScreen extends StatefulWidget {
-  const NewDeliveryScreen({super.key});
+class OrderHistoryScreen extends StatefulWidget {
+  const OrderHistoryScreen({super.key});
 
   @override
-  State<NewDeliveryScreen> createState() => _NewDeliveryScreenState();
+  State<OrderHistoryScreen> createState() => _OrderHistoryScreenState();
 }
 
-class _NewDeliveryScreenState extends State<NewDeliveryScreen> {
+class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
@@ -19,7 +20,8 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen> {
         StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('active_orders')
-              .where('orderStatus', isEqualTo: 'Waiting')
+              .where('riderID', isEqualTo: sharedPreferences!.get('uid'))
+              .where('orderStatus', whereIn: ['Delivered', 'Completed', 'Cancelled'])
               .orderBy('orderTime', descending: true)
               .snapshots(),
           builder: (context, orderSnapshot) {
@@ -39,14 +41,12 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen> {
               );
             } else {
               // return const SliverFillRemaining(child: Center(child: Text('No order yet.')));
-              return SliverFillRemaining(
+              return const SliverFillRemaining(
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      LoadingAnimationWidget.waveDots(
-                          color: Colors.blue, size: 48),
-                      const Text('Looking for new delivery'),
+                      Center(child: CircularProgressIndicator()),
                     ],
                   ),
                 ),

@@ -217,32 +217,52 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   /// NEW: A separate function to retrieve and store the FCM token
-  Future<void> _storeFcmToken(String riderId) async {
+  Future<void> _storeFcmToken(String storeID) async {
     try {
       // Retrieve the FCM token from the device
       String? fcmToken = await firebaseMessaging.getToken();
       if (fcmToken != null) {
-        // Create a new document with an Auto-generated ID
-        await firebaseFirestore
-            .collection('riders')
-            .doc(riderId)
+        // Check if the token already exists in the tokens subcollection
+        QuerySnapshot existingTokens = await firebaseFirestore
+            .collection('stores')
+            .doc(storeID)
             .collection('tokens')
-            .add({
-          'token': fcmToken,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
+            .where('token', isEqualTo: fcmToken)
+            .get();
+
+        if (existingTokens.docs.isEmpty) {
+          // Token does not exist; add it to the collection
+          await firebaseFirestore
+              .collection('stores')
+              .doc(storeID)
+              .collection('tokens')
+              .add({
+            'token': fcmToken,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+        }
 
         // Optional: Handle token refresh explicitly
         firebaseMessaging.onTokenRefresh.listen((newToken) async {
-          // Add the new token as another document
-          await firebaseFirestore
-              .collection('riders')
-              .doc(riderId)
+          // Check if the new token already exists
+          QuerySnapshot refreshedTokens = await firebaseFirestore
+              .collection('stores')
+              .doc(storeID)
               .collection('tokens')
-              .add({ // Auto ID again explicitly
-            'token': newToken,
-            'createdAt': FieldValue.serverTimestamp(),
-          });
+              .where('token', isEqualTo: newToken)
+              .get();
+
+          if (refreshedTokens.docs.isEmpty) {
+            // Add the new token as it doesn't exist yet
+            await firebaseFirestore
+                .collection('stores')
+                .doc(storeID)
+                .collection('tokens')
+                .add({
+              'token': newToken,
+              'createdAt': FieldValue.serverTimestamp(),
+            });
+          }
         });
       }
     } catch (e) {

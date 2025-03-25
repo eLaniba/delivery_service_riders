@@ -137,16 +137,6 @@ class _MainScreenState extends State<MainScreen> {
       ),
       backgroundColor: Colors.grey[200],
       body: _screens[widget.mainScreenIndex],
-      floatingActionButton:
-        widget.mainScreenIndex == 1 // Check if the Products tab is selected
-            ? FloatingActionButton(
-                onPressed: () {
-
-                },
-                child: Icon(
-               PhosphorIcons.package(PhosphorIconsStyle.fill),
-          ),
-        ) : null,
       bottomNavigationBar: BottomNavigationBar(
         onTap: (index) {
           setState(() {

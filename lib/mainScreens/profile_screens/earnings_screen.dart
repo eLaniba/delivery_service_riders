@@ -10,9 +10,9 @@ import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class EarningsScreen extends StatefulWidget {
-  final String storeID;
+  final String riderID;
 
-  const EarningsScreen({super.key, required this.storeID});
+  const EarningsScreen({super.key, required this.riderID});
 
   @override
   State<EarningsScreen> createState() => _EarningsScreenState();
@@ -65,8 +65,8 @@ class _EarningsScreenState extends State<EarningsScreen> with SingleTickerProvid
   Widget _buildSalesTab({required String paymentMethod}) {
     return FutureBuilder<QuerySnapshot>(
       future: _firestore
-          .collection('stores')
-          .doc(widget.storeID)
+          .collection('riders')
+          .doc(widget.riderID)
           .collection('transactions')
           .where('paymentMethod', isEqualTo: paymentMethod)
           .get(),

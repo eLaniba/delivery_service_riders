@@ -15,7 +15,6 @@ import 'package:delivery_service_riders/widgets/loading_dialog.dart';
 import 'package:delivery_service_riders/widgets/order_status_help.dart';
 import 'package:delivery_service_riders/widgets/order_status_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
