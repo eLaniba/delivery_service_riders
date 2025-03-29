@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/global/global.dart';
-import 'package:delivery_service_riders/mainScreens/main_screen.dart';
+import 'package:delivery_service_riders/mainScreens/main_screen_provider.dart';
 import 'package:delivery_service_riders/models/new_order.dart';
 import 'package:delivery_service_riders/sample_features/live_location_tracking_page.dart';
 import 'package:delivery_service_riders/sample_features/live_location_tracking_page_2.dart';
@@ -130,7 +130,7 @@ orderDetailsController({required BuildContext context, required NewOrder order})
 
         // Navigate to Start Delivery Page
         Future.delayed(const Duration(seconds: 3), () {
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 1, inProgressScreenIndex: 1)));
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreenProvider(mainScreenIndex: 1, inProgressScreenIndex: 1)));
           // Navigator.of(context).pop();
         });
       });
@@ -184,7 +184,7 @@ orderDetailsController({required BuildContext context, required NewOrder order})
 
         // Navigate to Start Delivery Page
         Future.delayed(const Duration(seconds: 3), () {
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 1, inProgressScreenIndex: 2)));
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreenProvider(mainScreenIndex: 1, inProgressScreenIndex: 2)));
           // Navigator.of(context).pop();
         });
       });
@@ -235,7 +235,7 @@ orderDetailsController({required BuildContext context, required NewOrder order})
 
       // Navigate to Start Delivery Page
       Future.delayed(const Duration(seconds: 3), () {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 1, inProgressScreenIndex: 2)));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreenProvider(mainScreenIndex: 1, inProgressScreenIndex: 2)));
         // Navigator.of(context).pop();
       });
     });
@@ -429,7 +429,7 @@ void _acceptOrder(BuildContext context, NewOrder order) async {
 
     // Continue with success actions...
     Navigator.of(context).pop();
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 1, inProgressScreenIndex: 0)));
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreenProvider(mainScreenIndex: 1, inProgressScreenIndex: 0)));
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.delayed(const Duration(milliseconds: 500), () {

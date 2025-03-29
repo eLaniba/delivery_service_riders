@@ -93,6 +93,7 @@ flutter:
     - assets/icons/location.png
     - assets/icons/square_rotated.png
     - assets/custom_icons/
+    - assets/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

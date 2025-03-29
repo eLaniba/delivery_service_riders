@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/global/permission_service.dart';
-import 'package:delivery_service_riders/mainScreens/main_screen.dart';
+import 'package:delivery_service_riders/mainScreens/main_screen_provider.dart';
 import 'package:delivery_service_riders/services/geopoint_json.dart';
 import 'package:delivery_service_riders/services/image_picker_service.dart';
 import 'package:delivery_service_riders/widgets/custom_text_field_validations.dart';
@@ -140,7 +140,7 @@ class _RegisterState extends State<Register> {
       saveDataToFirestore(currentUser!).then((value) {
         Navigator.pop(context);
         //send user to homePage
-        Route newRoute = MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 0, inProgressScreenIndex: 0,));
+        Route newRoute = MaterialPageRoute(builder: (c) => MainScreenProvider(mainScreenIndex: 0, inProgressScreenIndex: 2));
         Navigator.pushReplacement(context, newRoute);
       });
     }

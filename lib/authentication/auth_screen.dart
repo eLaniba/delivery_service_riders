@@ -1,5 +1,5 @@
 import 'package:delivery_service_riders/authentication/login_screen.dart';
-import 'package:delivery_service_riders/mainScreens/main_screen.dart';
+import 'package:delivery_service_riders/mainScreens/main_screen_provider.dart';
 import 'package:delivery_service_riders/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
@@ -31,7 +31,7 @@ class _AuthScreenState extends State<AuthScreen> {
       future: _authService.isLoggedIn(),
       builder: (context, snapshot) {
         if(snapshot.hasData && snapshot.data == true) {
-          return MainScreen(mainScreenIndex: 0, inProgressScreenIndex: 1,);
+          return MainScreenProvider(mainScreenIndex: 0, inProgressScreenIndex: 2,);
         } else {
           return const LoginScreen();
         }
