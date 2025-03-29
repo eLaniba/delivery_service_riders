@@ -1,74 +1,37 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:delivery_service_riders/global/global.dart';
-import 'package:delivery_service_riders/mainScreens/inProgressScreens/start_delivery_screen_2.dart';
 import 'package:delivery_service_riders/models/new_order.dart';
+import 'package:delivery_service_riders/services/providers/order_stream_provider.dart';
 import 'package:delivery_service_riders/widgets/order_card.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:provider/provider.dart';
 
-class StartDeliveryScreen extends StatefulWidget {
+class StartDeliveryScreen extends StatelessWidget {
   const StartDeliveryScreen({super.key});
 
   @override
-  State<StartDeliveryScreen> createState() => _StartDeliveryScreenState();
-}
-
-class _StartDeliveryScreenState extends State<StartDeliveryScreen> {
-  @override
   Widget build(BuildContext context) {
+    final orders = Provider.of<StartDeliveryOrders?>(context)?.orders ?? [];
+
     return CustomScrollView(
       slivers: [
-        StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance
-              .collection('active_orders')
-              .where('riderID', isEqualTo: '${sharedPreferences!.get('uid')}')
-              .where('orderStatus', whereIn: ['Picked up', 'Delivering'])
-              .orderBy('orderTime', descending: true)
-              .snapshots(),
-          builder: (context, orderSnapshot) {
-            if(orderSnapshot.connectionState == ConnectionState.waiting) {
-              return const SliverToBoxAdapter(child: Center(child: CircularProgressIndicator(),));
-            } else if(orderSnapshot.hasError) {
-              return SliverToBoxAdapter(child: Center(child: Text('Error: ${orderSnapshot.error}'),));
-            } else if(orderSnapshot.hasData && orderSnapshot.data!.docs.isNotEmpty) {
-              return SliverList(
-                delegate: SliverChildBuilderDelegate((context, index){
-                  NewOrder order = NewOrder.fromJson(orderSnapshot.data!.docs[index].data()! as Map<String, dynamic>,);
-
-                  return OrderCard(order: order,);
-
-                },
-                  childCount: orderSnapshot.data!.docs.length,
-                ),
-              );
-            } else {
-              // return const SliverFillRemaining(child: Center(child: Text('No order yet.')));
-              return SliverFillRemaining(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(
-                        PhosphorIcons.empty(PhosphorIconsStyle.regular),
-                        size: 48,
-                        color: Colors.grey,
-                      ),
-                      const Text(
-                        'You don\'t have any active delivery',
-                        style: TextStyle(
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-          },
-        ),
+        if (orders.isEmpty)
+          SliverFillRemaining(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(PhosphorIcons.empty(PhosphorIconsStyle.regular), size: 48, color: Colors.grey),
+                const SizedBox(height: 8),
+                const Text('No active order', style: TextStyle(color: Colors.grey)),
+              ],
+            ),
+          )
+        else
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+                  (context, index) => OrderCard(order: orders[index]),
+              childCount: orders.length,
+            ),
+          ),
       ],
     );
   }

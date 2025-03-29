@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/global/global.dart';
-import 'package:delivery_service_riders/mainScreens/inProgressScreens/in_progress_main_screen.dart';
-import 'package:delivery_service_riders/mainScreens/main_screen.dart';
+import 'package:delivery_service_riders/mainScreens/inProgressScreens/in_progress_main_screen_provider.dart';
+import 'package:delivery_service_riders/mainScreens/main_screen_provider.dart';
 import 'package:delivery_service_riders/models/new_order.dart';
 import 'package:delivery_service_riders/services/geopoint_json.dart';
 import 'package:delivery_service_riders/widgets/loading_dialog.dart';
@@ -98,7 +98,7 @@ class _NewDeliveryScreenState extends State<NewDeliveryScreen2> {
       // Close the loading dialog
       Navigator.of(context).pop();
 
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 1, inProgressScreenIndex: 0)));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreenProvider(mainScreenIndex: 1, inProgressScreenIndex: 0)));
 
       // Show a success Snackbar
       ScaffoldMessenger.of(context).showSnackBar(

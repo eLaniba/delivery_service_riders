@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/global/global.dart';
-import 'package:delivery_service_riders/mainScreens/main_screen.dart';
+import 'package:delivery_service_riders/mainScreens/main_screen_provider.dart';
 import 'package:delivery_service_riders/mainScreens/messages_screens/messages_screen_2.dart';
 
 import 'package:delivery_service_riders/models/add_to_cart_item.dart';
@@ -202,7 +202,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           Navigator.pushAndRemoveUntil(
                             context,
-                            MaterialPageRoute(builder: (_) => MainScreen(mainScreenIndex: 0, inProgressScreenIndex: 0)),
+                            MaterialPageRoute(builder: (_) => MainScreenProvider(mainScreenIndex: 1, inProgressScreenIndex: 0)),
                                 (route) => false,
                           );
                         });

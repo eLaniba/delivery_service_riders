@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/authentication/auth_screen.dart';
 import 'package:delivery_service_riders/authentication/email_verification_page.dart';
 import 'package:delivery_service_riders/global/global.dart';
-import 'package:delivery_service_riders/mainScreens/main_screen.dart';
+import 'package:delivery_service_riders/mainScreens/main_screen_provider.dart';
 import 'package:delivery_service_riders/services/auth_service.dart';
 import 'package:delivery_service_riders/services/geopoint_json.dart';
 import 'package:delivery_service_riders/widgets/custom_text_field.dart';
@@ -213,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen> {
     await _storeFcmToken(currentUser.uid);
 
     // Navigate to the main screen
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 0, inProgressScreenIndex: 0,)));
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreenProvider(mainScreenIndex: 2, inProgressScreenIndex: 0,)));
   }
 
   /// NEW: A separate function to retrieve and store the FCM token
