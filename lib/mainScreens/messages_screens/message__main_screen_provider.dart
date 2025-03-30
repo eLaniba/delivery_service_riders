@@ -1,11 +1,10 @@
-
-import 'package:delivery_service_riders/mainScreens/messages_screens/messages_screen.dart';
+import 'package:delivery_service_riders/mainScreens/messages_screens/message_main_screen.dart';
 import 'package:delivery_service_riders/services/providers/badge_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class MessagesScreenProvider extends StatelessWidget {
-  const MessagesScreenProvider({super.key});
+class MessageMainScreenProvider extends StatelessWidget {
+  const MessageMainScreenProvider({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +19,7 @@ class MessagesScreenProvider extends StatelessWidget {
           initialData: UserMessageCount(0),
         ),
       ],
-      child: const MessagesScreen(),
+      child: const MessageMainScreen(),
     );
   }
 }

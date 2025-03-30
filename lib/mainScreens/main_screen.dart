@@ -1,8 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/mainScreens/inProgressScreens/in_progress_main_screen_provider.dart';
-import 'package:delivery_service_riders/mainScreens/messages_screens/messages_screen.dart';
-import 'package:delivery_service_riders/mainScreens/messages_screens/messages_screen_provider.dart';
+import 'package:delivery_service_riders/mainScreens/messages_screens/message__main_screen_provider.dart';
 import 'package:delivery_service_riders/mainScreens/new_delivery_screens/new_delivery_screen.dart';
 import 'package:delivery_service_riders/mainScreens/profile_screens/profile_screen.dart';
 import 'package:delivery_service_riders/services/providers/badge_provider.dart';
@@ -101,7 +99,7 @@ class _MainScreenState extends State<MainScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const MessagesScreenProvider()), // Your search screen
+                    MaterialPageRoute(builder: (context) => const MessageMainScreenProvider()), // Your search screen
                   );
                 },
                 icon: Icon(PhosphorIcons.chatText()),

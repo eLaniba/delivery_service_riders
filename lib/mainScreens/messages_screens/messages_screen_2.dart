@@ -62,7 +62,7 @@ class _MessagesScreen2State extends State<MessagesScreen2> {
     // Retrieve current user details from sharedPreferences.
     String currentUserId = sharedPreferences!.getString('uid') ?? '';
     String currentUserName = sharedPreferences!.getString('name') ?? '';
-    String currentUserImageURL = sharedPreferences!.getString('imageURL') ?? '';
+    String currentUserImageURL = sharedPreferences!.getString('profileURL') ?? '';
 
     // Create a chat ID. Here, we sort the two IDs to create a unique ID.
     List<String> ids = [currentUserId, widget.partnerID];
