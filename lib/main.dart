@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/authentication/auth_screen.dart';
 import 'package:delivery_service_riders/splashScreen/splash_screen.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,12 @@ void main() async {
   savedDeliveredOrderPop = await loadDeliveredOrdersPop();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Enable Firestore Persistence using the latest approach
+  FirebaseFirestore.instance.settings = const Settings(
+    persistenceEnabled: true, // ✅ Enables offline caching
+    cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED, // ✅ Optional: No limit on cache size
   );
 
   runApp(const MyApp());
