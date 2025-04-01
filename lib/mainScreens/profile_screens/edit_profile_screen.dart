@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/models/riders.dart';
@@ -91,6 +90,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           await riderDocument.update({
             "riderProfileURL": profileURL,
           });
+          await sharedPreferences!.setString('profileURL', profileURL);
           break;
       }
 
@@ -105,15 +105,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-
   // Save profile changes to Firestore
   Future<void> _saveProfile() async {
     if (currentUserId == null) return;
     await firebaseFirestore.collection('riders').doc(currentUserId).update({
       'riderName': _nameController.text.trim(),
       // 'userEmail': _emailController.text,
-      'riderPhone': _phoneController.text,
+      'riderPhone': formatPhoneNumber(_phoneController.text.trim()),
     });
+
+    //Local storage update
+    sharedPreferences!.setString('name', _nameController.text.trim());
+    sharedPreferences!.setString('phone', formatPhoneNumber(_phoneController.text.trim()));
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Profile updated successfully'), backgroundColor: Colors.green,),
     );

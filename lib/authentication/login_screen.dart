@@ -11,6 +11,7 @@ import 'package:delivery_service_riders/widgets/error_dialog.dart';
 import 'package:delivery_service_riders/widgets/loading_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,6 +21,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  bool _isPasswordHidden = true;
+
   //AuthService class (see services/auth_service.dart)
   final AuthService _authService = AuthService();
 
@@ -302,14 +305,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       //Email Text
-                      Text(
+                      const Text(
                         'Email',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 8,),
+                      const SizedBox(height: 8,),
                       CustomTextField(
                         labelText: 'example@gmail.com',
                         controller: emailController,
@@ -318,20 +321,34 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 8),
                       //Password Text
-                      Text(
+                      const Text(
                         'Password',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 8,),
+                      const SizedBox(height: 8,),
                       //Password Text Field
                       CustomTextField(
                         labelText: 'password',
                         controller: passwordController,
-                        isObscure: true,
+                        isObscure: _isPasswordHidden,
                         validator: validatePassword,
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _isPasswordHidden = !_isPasswordHidden;
+                            });
+                          },
+                          icon: PhosphorIcon(
+                            _isPasswordHidden
+                                ? PhosphorIcons.eyeSlash(
+                                PhosphorIconsStyle.bold)
+                                : PhosphorIcons.eye(
+                                PhosphorIconsStyle.bold),
+                          ),
+                        ),
                       ),
                       //Forgot password? Text
                       TextButton(
