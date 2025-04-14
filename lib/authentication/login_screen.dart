@@ -227,7 +227,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (fcmToken != null) {
         // Check if the token already exists in the tokens subcollection
         QuerySnapshot existingTokens = await firebaseFirestore
-            .collection('stores')
+            .collection('riders')
             .doc(storeID)
             .collection('tokens')
             .where('token', isEqualTo: fcmToken)
@@ -236,7 +236,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (existingTokens.docs.isEmpty) {
           // Token does not exist; add it to the collection
           await firebaseFirestore
-              .collection('stores')
+              .collection('riders')
               .doc(storeID)
               .collection('tokens')
               .add({
@@ -249,7 +249,7 @@ class _LoginScreenState extends State<LoginScreen> {
         firebaseMessaging.onTokenRefresh.listen((newToken) async {
           // Check if the new token already exists
           QuerySnapshot refreshedTokens = await firebaseFirestore
-              .collection('stores')
+              .collection('riders')
               .doc(storeID)
               .collection('tokens')
               .where('token', isEqualTo: newToken)
@@ -258,7 +258,7 @@ class _LoginScreenState extends State<LoginScreen> {
           if (refreshedTokens.docs.isEmpty) {
             // Add the new token as it doesn't exist yet
             await firebaseFirestore
-                .collection('stores')
+                .collection('riders')
                 .doc(storeID)
                 .collection('tokens')
                 .add({

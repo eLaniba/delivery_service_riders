@@ -91,15 +91,15 @@ class _SignUpStepperState extends State<SignUpStepper> {
         "riderEmail": currentUser.email,
         "riderName": storeName,
         "riderPhone": storePhone,
-        "status": "registered",
+        "status": "pending",
         //Address of the store
         "riderAddress": address,
         "riderLocation": geoPoint,
         // Bool for Approval in Admin
         "emailVerified": true,
-        "phoneVerified": true, //Todo: Temporary enable
-        "idVerified": true, //Todo: Temporary enable
-        "driverVerified": true, //Todo: Temporary enable
+        "phoneVerified": false, //Todo: Temporary enable
+        "idVerified": false, //Todo: Temporary enable
+        "driverVerified": false, //Todo: Temporary enable
       });
 
       //Uploading the 3 Documents(images) to Firebase Cloud Storage
