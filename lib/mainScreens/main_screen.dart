@@ -4,6 +4,7 @@ import 'package:delivery_service_riders/mainScreens/messages_screens/message__ma
 import 'package:delivery_service_riders/mainScreens/new_delivery_screens/new_delivery_screen.dart';
 import 'package:delivery_service_riders/mainScreens/profile_screens/profile_screen.dart';
 import 'package:delivery_service_riders/services/providers/badge_provider.dart';
+import 'package:delivery_service_riders/services/util.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
@@ -22,18 +23,56 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   late final List<Widget> _screens;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    ///Handles Online/Offline Status
+    WidgetsBinding.instance.addObserver(this);
+
     _screens = [
       const NewDeliveryScreen(),
       InProgressMainScreenProvider(index: widget.inProgressScreenIndex,),
       const ProfileScreen(),
     ];
+
+    updateRiderStatus('online');
+  }
+
+  ///Online Offline Status
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    switch (state) {
+      case AppLifecycleState.resumed:
+        updateRiderStatus('online');
+        break;
+      case AppLifecycleState.paused:
+        updateRiderStatus('idle');
+        break;
+      case AppLifecycleState.detached:
+        updateRiderStatus('offline');
+        break;
+      case AppLifecycleState.inactive:
+      // Optional: can be ignored for now
+        break;
+      case AppLifecycleState.hidden:
+      // iOS/macOS specific, safe to treat like paused or do nothing
+        updateRiderStatus('idle');
+        break;
+    }
+  }
+
+
+  @override
+  void dispose() {
+    updateRiderStatus('offline');
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override

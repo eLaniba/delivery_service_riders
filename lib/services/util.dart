@@ -96,3 +96,12 @@ double calculateServiceFeeTotal(List<Sales> sales) {
 double calculateTotalEarnings(List<Sales> sales) {
   return sales.fold(0.0, (sum, sale) => sum + sale.earnings);
 }
+
+Future<void> updateRiderStatus(String status) async {
+  final riderID = sharedPreferences!.getString('uid');
+  if (riderID == null) return;
+
+  await firebaseFirestore.collection('riders').doc(riderID).update({
+    'riderStatus': status,
+  });
+}
