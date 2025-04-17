@@ -283,13 +283,13 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       orderDetailsController(context: context, order: order);
                     }
 
-                    if(order.orderStatus == 'Delivered' && !savedDeliveredOrderPop.contains(order.orderID)) {
+                    if(order.orderStatus == 'Completed' && !savedDeliveredOrderPop.contains(order.orderID)) {
                       orderDetailsController(context: context, order: order);
                     }
 
-                    if(order.orderStatus == 'Completed') {
-                      orderDetailsController(context: context, order: order);
-                    }
+                    // if(order.orderStatus == 'Completed') {
+                    //   orderDetailsController(context: context, order: order);
+                    // }
 
                     // Check if there's an Assigned Rider
                     bool hasRiderInfo = order.riderName != null && order.riderPhone != null;
@@ -443,12 +443,15 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               const SizedBox(height: 4,),
               orderTotal(
                 context: context,
+                subTotal: widget.order!.subTotal!,
+                ridersFee: widget.order!.riderFee!,
+                serviceFee: widget.order!.serviceFee!,
                 orderTotal: widget.order!.orderTotal!,
               ),
             ],
           ),
         ),
-        bottomNavigationBar: BottomAppBar(
+        bottomNavigationBar: widget.order!.orderStatus == 'Cancelled' || widget.order!.orderStatus == 'Completed' ? null : BottomAppBar(
           child: StreamBuilder<DocumentSnapshot>(
               stream: firebaseFirestore
                   .collection('active_orders')
@@ -773,18 +776,22 @@ Widget itemList({required List<AddToCartItem> items, required int listLimit}) {
   );
 }
 
-Widget orderTotal({required BuildContext context, required double orderTotal}) {
+Widget orderTotal({
+  required BuildContext context,
+  required double subTotal,
+  required double ridersFee,
+  required serviceFee,
+  required orderTotal,
+}) {
   return Container(
     padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
     color: Colors.white,
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        //Subtotal, Rider's Fee, Order Total text
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            //Subtotal Text
             Text(
               'Subtotal',
               style: TextStyle(
@@ -794,7 +801,6 @@ Widget orderTotal({required BuildContext context, required double orderTotal}) {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            //Rider's fee Text
             Text(
               'Rider\'s fee',
               style: TextStyle(
@@ -804,7 +810,15 @@ Widget orderTotal({required BuildContext context, required double orderTotal}) {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            //Order Total Text
+            Text(
+              'Convenience fee',
+              style: TextStyle(
+                fontSize: 16,
+                color: gray,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
             const Text(
               'Order Total',
               style: TextStyle(
@@ -816,13 +830,11 @@ Widget orderTotal({required BuildContext context, required double orderTotal}) {
             ),
           ],
         ),
-        //Prices
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            //Subtotal Text
             Text(
-              '₱ ${orderTotal.toStringAsFixed(2)}',
+              '₱ ${subTotal.toStringAsFixed(2)}',
               style: TextStyle(
                 fontSize: 16,
                 color: gray,
@@ -830,9 +842,8 @@ Widget orderTotal({required BuildContext context, required double orderTotal}) {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            //Rider's fee Text
             Text(
-              '₱ 0.00',
+              '₱ ${ridersFee.toStringAsFixed(2)}',
               style: TextStyle(
                 fontSize: 16,
                 color: gray,
@@ -840,7 +851,15 @@ Widget orderTotal({required BuildContext context, required double orderTotal}) {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            //Order Total Text
+            Text(
+              '₱ ${serviceFee.toStringAsFixed(2)}',
+              style: TextStyle(
+                fontSize: 16,
+                color: gray,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
             Text(
               '₱ ${orderTotal.toStringAsFixed(2)}',
               style: TextStyle(
@@ -857,6 +876,7 @@ Widget orderTotal({required BuildContext context, required double orderTotal}) {
     ),
   );
 }
+
 
 
 

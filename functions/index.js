@@ -13,16 +13,19 @@ exports.completeOrderStoreRider = functions.firestore
         console.log("Previous Data:", previousValue);
         console.log("New Data:", newValue);
 
-        // Check if storeDelivered or ridersStoreDelivered has changed
+        // Check if storeDelivered or riderStoreDelivered has changed
         if (
             newValue.storeDelivered !== previousValue.storeDelivered ||
-            newValue.ridersStoreDelivered !== previousValue.ridersStoreDelivered
+            newValue.riderStoreDelivered !== previousValue.riderStoreDelivered
         ) {
-            // If storeDelivered is not null AND ridersStoreDelivered is true
-            if (newValue.storeDelivered !== null && newValue.ridersStoreDelivered === true) {
-                console.log("storeDelivered is not null and ridersStoreDelivered is true. Updating fields...");
+            // If storeDelivered is not null, riderStoreDelivered is true, and storeStatus is not 'Completed'
+            if (
+                newValue.storeDelivered !== null &&
+                newValue.riderStoreDelivered === true &&
+                newValue.storeStatus !== "Completed"
+            ) {
+                console.log("Conditions met. Updating order status fields...");
 
-                // Proceed to update the following fields
                 return change.after.ref.update({
                     orderStatus: "Picked up",
                     storeStatus: "Completed",
@@ -53,15 +56,16 @@ exports.completeOrderUserRider = functions.firestore
             if (newValue.userDelivered !== null && newValue.riderUserDelivered === true) {
                 console.log("userDelivered is not null and riderUserDelivered is true. Updating fields...");
 
-                // Update the orderStatus and userStatus to 'Completed'
+                // Update the orderStatus, userStatus, and orderDelivered timestamp
                 return change.after.ref.update({
                     orderStatus: "Completed",
-                    userStatus: "Completed"
+                    userStatus: "Completed",
+                    orderDelivered: admin.firestore.FieldValue.serverTimestamp()
                 });
             }
         }
-
         return null;
     });
+
 
 

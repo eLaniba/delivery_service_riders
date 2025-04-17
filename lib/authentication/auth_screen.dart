@@ -31,7 +31,7 @@ class _AuthScreenState extends State<AuthScreen> {
       future: _authService.isLoggedIn(),
       builder: (context, snapshot) {
         if(snapshot.hasData && snapshot.data == true) {
-          return MainScreenProvider(mainScreenIndex: 0, inProgressScreenIndex: 2,);
+          return MainScreenProvider(mainScreenIndex: 2, inProgressScreenIndex: 0,);
         } else {
           return const LoginScreen();
         }

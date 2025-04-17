@@ -18,7 +18,10 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Order History'),
+        backgroundColor: Theme.of(context).primaryColor,
+        foregroundColor: Colors.white,
       ),
+      backgroundColor: Colors.grey[200],
       body:  CustomScrollView(
         slivers: [
           StreamBuilder<QuerySnapshot>(

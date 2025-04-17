@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/models/sales.dart';
 import 'package:delivery_service_riders/services/util.dart';
@@ -105,21 +104,21 @@ class _EarningsScreenState extends State<EarningsScreen> with SingleTickerProvid
           child: Column(
             children: [
               //Sales for the Month of $month
-              Text(' ${DateFormat('MMMM').format(transactions[0].orderCompleted.toDate())}', style: TextStyle(fontWeight: FontWeight.bold),),
+              Text(' ${DateFormat('MMMM').format(transactions[0].orderCompleted.toDate())}', style: const TextStyle(fontWeight: FontWeight.bold),),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   //Earnings
                   Row(
                     children: [
-                      Text('Earnings: '),
+                      const Text('Earnings: '),
                       transactionStatusWidget(true, calculateTotalEarnings(transactions)),
                     ],
                   ),
                   //Service Fee
                   Row(
                     children: [
-                      Text('Service Fee: '),
+                      const Text('Service Fee: '),
                       transactionStatusWidget(false, calculateServiceFeeTotal(transactions)),
                     ],
                   ),
@@ -165,13 +164,13 @@ class _EarningsScreenState extends State<EarningsScreen> with SingleTickerProvid
                       drawVerticalLine: true,
                       drawHorizontalLine: true,
                       getDrawingHorizontalLine: (value) {
-                        return FlLine(
+                        return const FlLine(
                           color: Colors.grey,
                           strokeWidth: 1,
                         );
                       },
                       getDrawingVerticalLine: (value) {
-                        return FlLine(
+                        return const FlLine(
                           color: Colors.grey,
                           strokeWidth: 0,
                         );
@@ -246,9 +245,9 @@ class _EarningsScreenState extends State<EarningsScreen> with SingleTickerProvid
                       //     ),
                       //   ),
                       // ),
-                      leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                     ),
                     borderData: FlBorderData(
                       show: true,
@@ -269,7 +268,7 @@ class _EarningsScreenState extends State<EarningsScreen> with SingleTickerProvid
                         color: Colors.blue,
                         barWidth: 4,
                         isStrokeCapRound: true,
-                        dotData: FlDotData(show: true),
+                        dotData: const FlDotData(show: true),
                         belowBarData: BarAreaData(show: false),
                       ),
                     ],
@@ -278,7 +277,7 @@ class _EarningsScreenState extends State<EarningsScreen> with SingleTickerProvid
                 ),
               ),
 
-              Divider(
+              const Divider(
                 color: Color.fromARGB(255, 242, 243, 244), // You can customize the color
                 height: 25,
                 thickness: 1,
@@ -286,7 +285,7 @@ class _EarningsScreenState extends State<EarningsScreen> with SingleTickerProvid
                 endIndent: 8,
               ),
 
-              Text('Order Transactions ', style: TextStyle(fontWeight: FontWeight.bold),),
+              const Text('Order Transactions ', style: TextStyle(fontWeight: FontWeight.bold),),
               // Transaction List
               Expanded(
                 child: ListView.builder(
@@ -320,7 +319,7 @@ class _EarningsScreenState extends State<EarningsScreen> with SingleTickerProvid
                             ],
                           ),
                         ),
-                        Divider(
+                        const Divider(
                           color: Color.fromARGB(255, 242, 243, 244), // You can customize the color
                           height: 1,
                           thickness: 1,

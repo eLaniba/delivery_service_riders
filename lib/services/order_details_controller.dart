@@ -187,8 +187,7 @@ orderDetailsController({required BuildContext context, required NewOrder order})
     }
   }
 
-  ///Remove for REVISIONS ----------------------
-  else if(order.orderStatus == 'Delivered') {
+  else if(order.orderStatus == 'Completed') {
     if(!savedDeliveredOrderPop.contains(order.orderID)) {
       addOrderToDeliveredPop(order.orderID!);
 
@@ -197,17 +196,17 @@ orderDetailsController({required BuildContext context, required NewOrder order})
 
       //Show Confirm Success Dialog
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Future.delayed(const Duration(milliseconds: 500), () {
+        Future.delayed(const Duration(seconds: 1), () {
           confirmSuccessDialog(
             context: context,
-            message: "Customer delivery confirmed. Return to the store to complete the order.",
+            message: "The order is complete. Thank you for your excellent service!",
           );
         });
 
         // Navigate to Start Delivery Page
         Future.delayed(const Duration(seconds: 3), () {
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreenProvider(mainScreenIndex: 1, inProgressScreenIndex: 2)));
-          // Navigator.of(context).pop();
+          // Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreenProvider(mainScreenIndex: 1, inProgressScreenIndex: 1)));
+          Navigator.of(context).pop();
         });
       });
     } else {
@@ -230,6 +229,29 @@ orderDetailsController({required BuildContext context, required NewOrder order})
     }
   }
 
+
+  ///Remove for REVISIONS ----------------------
+  else if(order.orderStatus == 'Delivered') {
+    //Close the confirmLoadingDialog from 'Picking up' state
+    closeConfirmLoadingDialog();
+
+    //Show Confirm Success Dialog
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(seconds: 1), () {
+        confirmSuccessDialog(
+          context: context,
+          message: "The order is complete. Thank you for your excellent service!",
+        );
+      });
+
+      // Navigate to Start Delivery Page
+      Future.delayed(const Duration(seconds: 3), () {
+        // Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreenProvider(mainScreenIndex: 1, inProgressScreenIndex: 1)));
+        Navigator.of(context).pop();
+      });
+    });
+  }
+
   else if(order.orderStatus == 'Completing') {
     bool result = await orderDialog(
       context: context,
@@ -246,27 +268,7 @@ orderDetailsController({required BuildContext context, required NewOrder order})
     }
   }
   ///Remove for REVISIONS ----------------------
-  ///
-  else if(order.orderStatus == 'Completed') {
-    //Close the confirmLoadingDialog from 'Picking up' state
-    closeConfirmLoadingDialog();
 
-    //Show Confirm Success Dialog
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(seconds: 1), () {
-        confirmSuccessDialog(
-          context: context,
-          message: "The order is complete. Thank you for your excellent service!",
-        );
-      });
-
-      // Navigate to Start Delivery Page
-      Future.delayed(const Duration(seconds: 3), () {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreenProvider(mainScreenIndex: 1, inProgressScreenIndex: 2)));
-        // Navigator.of(context).pop();
-      });
-    });
-  }
 }
 
 ///-------------------------Dialogs------------------------------------

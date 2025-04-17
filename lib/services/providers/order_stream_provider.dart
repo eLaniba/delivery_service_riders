@@ -39,6 +39,7 @@ class OrderStreamProvider {
         .collection('active_orders')
         .where('riderID', isEqualTo: uid)
         .where('orderStatus', whereIn: [
+          'Picking up',
           'Picked up',
           'Delivering',
         ])

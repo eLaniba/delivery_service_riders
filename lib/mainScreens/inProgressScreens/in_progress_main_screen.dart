@@ -25,7 +25,7 @@ class _InProgressMainScreenState extends State<InProgressMainScreen> with Single
   void initState() {
     super.initState();
     // Initialize TabController with the initial index
-    _tabController = TabController(length: 3, vsync: this, initialIndex: widget.index);
+    _tabController = TabController(length: 2, vsync: this, initialIndex: widget.index);
   }
 
   @override
@@ -44,7 +44,7 @@ class _InProgressMainScreenState extends State<InProgressMainScreen> with Single
     return Scaffold(
       backgroundColor: Colors.grey[200],
       body: DefaultTabController(
-        length: 3,
+        length: 2,
         child: Column(
           children: [
             Container(
