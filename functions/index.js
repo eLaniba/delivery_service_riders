@@ -3,67 +3,65 @@ const admin = require("firebase-admin");
 
 // Initialize Firebase Admin SDK
 admin.initializeApp();
+//Confirmation between Store and Rider
+exports.completeOrderStoreRider = functions.firestore
+    .document("active_orders/{orderId}")
+    .onUpdate((change, context) => {
+        const previousValue = change.before.data();
+        const newValue = change.after.data();
+
+        console.log("Previous Data:", previousValue);
+        console.log("New Data:", newValue);
+
+        // Check if storeDelivered or ridersStoreDelivered has changed
+        if (
+            newValue.storeDelivered !== previousValue.storeDelivered ||
+            newValue.ridersStoreDelivered !== previousValue.ridersStoreDelivered
+        ) {
+            // If storeDelivered is not null AND ridersStoreDelivered is true
+            if (newValue.storeDelivered !== null && newValue.ridersStoreDelivered === true) {
+                console.log("storeDelivered is not null and ridersStoreDelivered is true. Updating fields...");
+
+                // Proceed to update the following fields
+                return change.after.ref.update({
+                    orderStatus: "Picked up",
+                    storeStatus: "Completed",
+                    userStatus: "Picked up"
+                });
+            }
+        }
+
+        return null;
+    });
 
 //Confirmation between Rider and User
-exports.confirmOrderStatusUserRider = functions.firestore
-    .document("active_orders/{orderId}") // Replace 'orders' with your Firestore collection name if different
+exports.completeOrderUserRider = functions.firestore
+    .document("active_orders/{orderId}")
     .onUpdate((change, context) => {
-        // Fetch the data before and after the update
         const previousValue = change.before.data();
         const newValue = change.after.data();
 
-        // Log data for debugging purposes
         console.log("Previous Data:", previousValue);
         console.log("New Data:", newValue);
 
-        // Check if userConfirm and riderConfirm fields changed
+        // Check if userDelivered or riderUserDelivered has changed
         if (
-            newValue.userConfirmDelivery !== previousValue.userConfirmDelivery ||
-            newValue.riderConfirmDelivery !== previousValue.riderConfirmDelivery
+            newValue.userDelivered !== previousValue.userDelivered ||
+            newValue.riderUserDelivered !== previousValue.riderUserDelivered
         ) {
-            // If both userConfirm and riderConfirm are true
-            if (newValue.userConfirmDelivery === true && newValue.riderConfirmDelivery === true) {
-                console.log("Both userConfirm and riderConfirm are true. Updating orderStatus to 'Delivered'.");
+            // If userDelivered is not null AND riderUserDelivered is true
+            if (newValue.userDelivered !== null && newValue.riderUserDelivered === true) {
+                console.log("userDelivered is not null and riderUserDelivered is true. Updating fields...");
 
-                // Update the orderStatus field to 'Delivered'
-                return change.after.ref.update({
-                    orderStatus: "Delivered",
-                });
-            }
-        }
-
-        // Return null if no action is required
-        return null;
-    });
-
-//Confirmation between Store and Rider
-exports.confirmOrderStatusComplete = functions.firestore
-    .document("active_orders/{orderId}") // Replace 'active_orders' with your Firestore collection name if different
-    .onUpdate((change, context) => {
-        // Fetch the data before and after the update
-        const previousValue = change.before.data();
-        const newValue = change.after.data();
-
-        // Log data for debugging purposes
-        console.log("Previous Data:", previousValue);
-        console.log("New Data:", newValue);
-
-        // Check if orderDelivered and storeConfirmDelivery fields changed
-        if (
-            newValue.orderDelivered !== previousValue.orderDelivered ||
-            newValue.storeConfirmDelivery !== previousValue.storeConfirmDelivery
-        ) {
-            // If orderDelivered is not null and storeConfirmDelivery is true
-            if (newValue.orderDelivered !== null && newValue.storeConfirmDelivery === true) {
-                console.log("orderDelivered is not null and storeConfirmDelivery is true. Updating orderStatus to 'Confirmed by Store'.");
-
-                // Update the orderStatus field to 'Confirmed by Store'
+                // Update the orderStatus and userStatus to 'Completed'
                 return change.after.ref.update({
                     orderStatus: "Completed",
+                    userStatus: "Completed"
                 });
             }
         }
 
-        // Return null if no action is required
         return null;
     });
+
+

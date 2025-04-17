@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 BuildContext? confirmLoadingDialogContext;
-
+//UI Contents for Buttons
 String buttonTitle(String orderStatus) {
   if(orderStatus == 'Waiting') {
     return 'Accept Order';
@@ -55,7 +55,7 @@ String orderDialogContent(String orderStatus) {
   } else if(orderStatus == 'Assigned') {
     return 'You’re about to start the route to pick up the order. Follow the directions to the store for pickup.';
   } else if(orderStatus == 'Picking up') {
-    return 'Request Pickup Confirmation';
+    return 'By pressing this button, you confirm the you have paid for and received the order.\n\nPlease ensure all transactions are complete before confirming. Proceed?';
   } else if(orderStatus == 'Picked up') {
     return 'You’re about to start the route to deliver the order to the customer. Follow the directions to deliver it to the customer’s address.';
   } else if(orderStatus == 'Delivering') {
@@ -71,6 +71,7 @@ String orderDialogContent(String orderStatus) {
   }
 }
 
+//Order Controller
 orderDetailsController({required BuildContext context, required NewOrder order}) async {
   //If orderStatus == 'Waiting', perform this operation
   if(order.orderStatus == 'Waiting') {
@@ -90,7 +91,9 @@ orderDetailsController({required BuildContext context, required NewOrder order})
       );
       _acceptOrder(context, order);
     }
-  } else if(order.orderStatus == 'Assigned') {
+  }
+
+  else if(order.orderStatus == 'Assigned') {
     bool result = await orderDialog(
       context: context,
       title: orderDialogTitle(order.orderStatus!),
@@ -107,12 +110,26 @@ orderDetailsController({required BuildContext context, required NewOrder order})
       );
       _startPickupRoute(context, order);
     }
-  } else if(order.orderStatus == 'Picking up') {
-    confirmLoadingDialog(
+  }
+
+  else if(order.orderStatus == 'Picking up') {
+    bool result = await orderDialog(
       context: context,
-      message: 'Requesting confirmation from the store',
+      title: orderDialogTitle(order.orderStatus!),
+      content: orderDialogContent(order.orderStatus!),
+      action: 'Yes',
     );
-  } else if(order.orderStatus == 'Picked up') {
+
+    if(result) {
+      confirmLoadingDialog(
+        context: context,
+        message: 'Requesting confirmation from the store',
+      );
+      _requestPickupConfirmation(context, order);
+    }
+  }
+
+  else if(order.orderStatus == 'Picked up') {
     if(!savedPickedUpOrderPop.contains(order.orderID)) {
       addOrderToPickedUpPop(order.orderID!);
 
@@ -152,7 +169,9 @@ orderDetailsController({required BuildContext context, required NewOrder order})
         _startDeliveryRoute(context, order);
       }
     }
-  } else if(order.orderStatus == 'Delivering') {
+  }
+
+  else if(order.orderStatus == 'Delivering') {
     bool result = await orderDialog(
       context: context,
       title: orderDialogTitle(order.orderStatus!),
@@ -166,7 +185,10 @@ orderDetailsController({required BuildContext context, required NewOrder order})
       );
       _requestDeliveryConfirmation(context, order);
     }
-  } else if(order.orderStatus == 'Delivered') {
+  }
+
+  ///Remove for REVISIONS ----------------------
+  else if(order.orderStatus == 'Delivered') {
     if(!savedDeliveredOrderPop.contains(order.orderID)) {
       addOrderToDeliveredPop(order.orderID!);
 
@@ -206,7 +228,9 @@ orderDetailsController({required BuildContext context, required NewOrder order})
         _startCompletingRoute(context, order);
       }
     }
-  } else if(order.orderStatus == 'Completing') {
+  }
+
+  else if(order.orderStatus == 'Completing') {
     bool result = await orderDialog(
       context: context,
       title: orderDialogTitle(order.orderStatus!),
@@ -220,7 +244,10 @@ orderDetailsController({required BuildContext context, required NewOrder order})
       );
       _startCompletingOrder(context, order);
     }
-  } else if(order.orderStatus == 'Completed') {
+  }
+  ///Remove for REVISIONS ----------------------
+  ///
+  else if(order.orderStatus == 'Completed') {
     //Close the confirmLoadingDialog from 'Picking up' state
     closeConfirmLoadingDialog();
 
@@ -242,7 +269,11 @@ orderDetailsController({required BuildContext context, required NewOrder order})
   }
 }
 
-Future<bool> orderDialog({required BuildContext context, required String title, required String content, required String action}) {
+///-------------------------Dialogs------------------------------------
+Future<bool> orderDialog({required BuildContext context,
+    required String title,
+    required String content,
+    required String action}) {
   return showDialog<bool>(
     context: context,
     builder: (BuildContext context) {
@@ -291,7 +322,10 @@ Future<bool> orderDialog({required BuildContext context, required String title, 
   ).then((value) => value ?? false);
 }
 
-Future<void> confirmLoadingDialog({required BuildContext context, required String message}) {
+Future<void> confirmLoadingDialog({
+  required BuildContext context,
+  required String message,
+}) {
   return showDialog(
     context: context,
     barrierDismissible: false,
@@ -319,13 +353,18 @@ Future<void> confirmLoadingDialog({required BuildContext context, required Strin
     },
   );
 }
+
 void closeConfirmLoadingDialog() {
   if (confirmLoadingDialogContext != null) {
     Navigator.of(confirmLoadingDialogContext!).pop();
     confirmLoadingDialogContext = null;
   }
 }
-Future<void> confirmSuccessDialog({required BuildContext context, required String message}) {
+
+Future<void> confirmSuccessDialog({
+  required BuildContext context,
+  required String message,
+}) {
   return showDialog(
     context: context,
     barrierDismissible: false,
@@ -355,52 +394,8 @@ Future<void> confirmSuccessDialog({required BuildContext context, required Strin
   );
 }
 
-// void _acceptOrder(BuildContext context, NewOrder order) async {
-//   DocumentReference orderDocument = firebaseFirestore
-//       .collection('active_orders')
-//       .doc('${order.orderID}');
-//
-//   try {
-//     await orderDocument.update({
-//       'orderStatus': 'Assigned',
-//       'riderID': sharedPreferences!.getString('uid'),
-//       'riderName': sharedPreferences!.getString('name'),
-//       'riderPhone': sharedPreferences!.getString('phone'),
-//       'riderConfirmDelivery': false,
-//       'riderLocation': parseGeoPointFromJson(sharedPreferences!.getString('location').toString()),
-//     });
-//
-//     // Close the loading dialog
-//     Navigator.of(context).pop();
-//     Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreen(mainScreenIndex: 2, inProgressScreenIndex: 0)));
-//
-//     WidgetsBinding.instance.addPostFrameCallback((_) {
-//       Future.delayed(const Duration(milliseconds: 500), () {
-//         ScaffoldMessenger.of(context).showSnackBar(
-//           const SnackBar(
-//             content: Text('Order Accepted! Proceed to the store for pickup'),
-//             backgroundColor: Colors.blue, // Optional: Set background color
-//             duration: Duration(seconds: 5), // Optional: How long the snackbar is shown
-//           ),
-//         );
-//       });
-//     });
-//   }catch(e) {
-//     // Close the loading dialog
-//     Navigator.of(context).pop();
-//     WidgetsBinding.instance.addPostFrameCallback((_) {
-//       Future.delayed(const Duration(milliseconds: 500), () {
-//         ScaffoldMessenger.of(context).showSnackBar(
-//           SnackBar(
-//             content: Text('Failed to accept order: $e'),
-//             backgroundColor: Colors.red, // Optional: Set background color for error
-//             duration: const Duration(seconds: 5), // Optional: How long the snackbar is shown
-//           ),
-//         );
-//       });
-//     });
-//   }
-// }
+///-------------------------Dialogs------------------------------------
+
 
 void _acceptOrder(BuildContext context, NewOrder order) async {
   DocumentReference orderDocument = firebaseFirestore
@@ -418,11 +413,12 @@ void _acceptOrder(BuildContext context, NewOrder order) async {
 
       transaction.update(orderDocument, {
         'orderStatus': 'Assigned',
+        'storeStatus': 'Assigned',
+        'userStatus': 'Assigned',
         'riderProfileURL': sharedPreferences!.getString('profileURL'),
         'riderID': sharedPreferences!.getString('uid'),
         'riderName': sharedPreferences!.getString('name'),
         'riderPhone': sharedPreferences!.getString('phone'),
-        'riderConfirmDelivery': false,
         'riderLocation': parseGeoPointFromJson(sharedPreferences!.getString('location').toString()),
       });
     });
@@ -467,32 +463,6 @@ void _acceptOrder(BuildContext context, NewOrder order) async {
   }
 }
 
-void _requestDeliveryConfirmation(BuildContext context, NewOrder order) async {
-  DocumentReference orderDocument = firebaseFirestore
-      .collection('active_orders')
-      .doc('${order.orderID}');
-
-  try {
-    await orderDocument.update({
-      'riderConfirmDelivery': true,
-    });
-
-  }catch(e) {
-    // Close the loading dialog
-    Navigator.of(context).pop();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(milliseconds: 500), () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to accept order: $e'),
-            backgroundColor: Colors.red, // Optional: Set background color for error
-            duration: const Duration(seconds: 5), // Optional: How long the snackbar is shown
-          ),
-        );
-      });
-    });
-  }
-}
 void _startPickupRoute(BuildContext context, NewOrder order) async {
   DocumentReference orderDocument = firebaseFirestore
       .collection('active_orders')
@@ -501,6 +471,8 @@ void _startPickupRoute(BuildContext context, NewOrder order) async {
   try{
     await orderDocument.update({
       'orderStatus': 'Picking up',
+      'storeStatus': 'Picking up',
+      'userStatus': 'Picking up',
     });
 
     // Close the loading dialog
@@ -529,6 +501,35 @@ void _startPickupRoute(BuildContext context, NewOrder order) async {
     });
   }
 }
+
+//This is for Store - Rider Confirmation
+void _requestPickupConfirmation(BuildContext context, NewOrder order) async {
+  DocumentReference orderDocument = firebaseFirestore
+      .collection('active_orders')
+      .doc('${order.orderID}');
+
+  try {
+    await orderDocument.update({
+      'riderStoreDelivered': true,
+    });
+
+  }catch(e) {
+    // Close the loading dialog
+    Navigator.of(context).pop();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to accept order: $e'),
+            backgroundColor: Colors.red, // Optional: Set background color for error
+            duration: const Duration(seconds: 5), // Optional: How long the snackbar is shown
+          ),
+        );
+      });
+    });
+  }
+}
+
 void _startDeliveryRoute(BuildContext context, NewOrder order) async {
   DocumentReference orderDocument = firebaseFirestore
       .collection('active_orders')
@@ -537,6 +538,7 @@ void _startDeliveryRoute(BuildContext context, NewOrder order) async {
   try{
     await orderDocument.update({
       'orderStatus': 'Delivering',
+      'userStatus': 'Delivering',
     });
 
     // Close the loading dialog
@@ -565,6 +567,36 @@ void _startDeliveryRoute(BuildContext context, NewOrder order) async {
     });
   }
 }
+
+//This is for User - Rider Confirmation
+void _requestDeliveryConfirmation(BuildContext context, NewOrder order) async {
+  DocumentReference orderDocument = firebaseFirestore
+      .collection('active_orders')
+      .doc('${order.orderID}');
+
+  try {
+    await orderDocument.update({
+      'riderUserDelivered': true,
+    });
+
+  }catch(e) {
+    // Close the loading dialog
+    Navigator.of(context).pop();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to accept order: $e'),
+            backgroundColor: Colors.red, // Optional: Set background color for error
+            duration: const Duration(seconds: 5), // Optional: How long the snackbar is shown
+          ),
+        );
+      });
+    });
+  }
+}
+
+///METHODS REMOVE FOR REVISIONS-------------------------
 void _startCompletingRoute(BuildContext context, NewOrder order) async {
   DocumentReference orderDocument = firebaseFirestore
       .collection('active_orders')
@@ -601,6 +633,7 @@ void _startCompletingRoute(BuildContext context, NewOrder order) async {
     });
   }
 }
+//This methods is removed for the revisions
 void _startCompletingOrder(BuildContext context, NewOrder order) async {
   DateTime now = DateTime.now();
   Timestamp orderDelivered = Timestamp.fromDate(now);
@@ -630,3 +663,4 @@ void _startCompletingOrder(BuildContext context, NewOrder order) async {
     });
   }
 }
+///METHODS REMOVE FOR REVISIONS-------------------------

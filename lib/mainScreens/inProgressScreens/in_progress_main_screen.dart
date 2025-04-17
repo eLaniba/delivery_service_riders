@@ -39,7 +39,7 @@ class _InProgressMainScreenState extends State<InProgressMainScreen> with Single
   Widget build(BuildContext context) {
     final storePickupOrders = Provider.of<StorePickupOrders?>(context)?.orders ?? [];
     final startDeliveryOrders = Provider.of<StartDeliveryOrders?>(context)?.orders ?? [];
-    final completingOrders = Provider.of<CompletingDeliveryOrders?>(context)?.orders ?? [];
+    // final completingOrders = Provider.of<CompletingDeliveryOrders?>(context)?.orders ?? [];
 
     return Scaffold(
       backgroundColor: Colors.grey[200],
@@ -54,7 +54,7 @@ class _InProgressMainScreenState extends State<InProgressMainScreen> with Single
                 tabs: [
                   buildTabWithBadge(context, 'Store Pickup', storePickupOrders.length),
                   buildTabWithBadge(context, 'Start Delivery', startDeliveryOrders.length),
-                  buildTabWithBadge(context, 'Completing', completingOrders.length),
+                  // buildTabWithBadge(context, 'Completing', completingOrders.length),
                 ],
               ),
             ),
@@ -64,7 +64,7 @@ class _InProgressMainScreenState extends State<InProgressMainScreen> with Single
                 children: const [
                   StorePickupScreen(),
                   StartDeliveryScreen(),
-                  CompletingScreen(),
+                  // CompletingScreen(),
                 ],
               ),
             ),

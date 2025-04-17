@@ -29,10 +29,10 @@ class _InProgressMainScreenProviderState extends State<InProgressMainScreenProvi
           create: (_) => OrderStreamProvider.startDeliveryOrdersStream(),
           initialData: StartDeliveryOrders([]),
         ),
-        StreamProvider(
-          create: (_) => OrderStreamProvider.completingDeliveryOrdersStream(),
-          initialData: CompletingDeliveryOrders([]),
-        ),
+        // StreamProvider(
+        //   create: (_) => OrderStreamProvider.completingDeliveryOrdersStream(),
+        //   initialData: CompletingDeliveryOrders([]),
+        // ),
       ],
       child: InProgressMainScreen(index: widget.index),
     );

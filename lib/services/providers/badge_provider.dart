@@ -54,7 +54,6 @@ class BadgeProvider {
         .where('riderID', isEqualTo: uid)
         .where('orderStatus', whereNotIn: [
           'Pending',
-          'Accepted',
           'Preparing',
           'Waiting',
           'Cancelled',
