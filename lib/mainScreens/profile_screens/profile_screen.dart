@@ -141,7 +141,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         },
                       ),
                       ListTile(
-                        leading: PhosphorIcon(PhosphorIcons.currencyDollar(PhosphorIconsStyle.fill), color: Theme.of(context).primaryColor,),
+                        leading: Container(
+                          margin: const EdgeInsets.only(left: 3),
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+
+                            borderRadius: BorderRadius.circular(50.0), // Fully rounded corners
+                          ),
+                          alignment: Alignment.center,
+                          child: const Text(
+                            '₱',
+                            style: TextStyle(fontSize: 14, color: Colors.white),
+                          ),
+                        ),
                         title: const Text('Earnings'),
                         trailing: PhosphorIcon(PhosphorIcons.caretRight(PhosphorIconsStyle.regular),),
                         onTap: () {

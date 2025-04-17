@@ -1,6 +1,7 @@
 import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/mainScreens/inProgressScreens/order_details_screen.dart';
 import 'package:delivery_service_riders/models/new_order.dart';
+import 'package:delivery_service_riders/services/util.dart';
 import 'package:delivery_service_riders/widgets/order_status_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -97,7 +98,7 @@ class OrderCard extends StatelessWidget {
                     const SizedBox(width: 4,),
                     // Store Phone
                     Text(
-                      order.storePhone!,
+                      reformatPhoneNumber(order.storePhone!),
                       style: TextStyle(
                         fontSize: 16,
                         color: gray,
@@ -134,7 +135,7 @@ class OrderCard extends StatelessWidget {
                     const SizedBox(width: 4,),
                     //User Phone
                     Text(
-                      order.userPhone!,
+                      reformatPhoneNumber(order.userPhone!),
                       style: TextStyle(
                         fontSize: 16,
                         color: gray,

@@ -53,7 +53,7 @@ class _InProgressMainScreenState extends State<InProgressMainScreen> with Single
                 controller: _tabController,
                 tabs: [
                   buildTabWithBadge(context, 'Store Pickup', storePickupOrders.length),
-                  buildTabWithBadge(context, 'Start Delivery', startDeliveryOrders.length),
+                  buildTabWithBadge(context, 'Customer Delivery', startDeliveryOrders.length),
                   // buildTabWithBadge(context, 'Completing', completingOrders.length),
                 ],
               ),

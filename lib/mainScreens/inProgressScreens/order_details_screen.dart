@@ -10,10 +10,12 @@ import 'package:delivery_service_riders/sample_features/live_location_tracking_p
 import 'package:delivery_service_riders/sample_features/live_location_tracking_page_2.dart';
 import 'package:delivery_service_riders/services/order_details_controller.dart';
 import 'package:delivery_service_riders/services/util.dart';
+import 'package:delivery_service_riders/widgets/confirmation_dialog.dart';
 import 'package:delivery_service_riders/widgets/error_dialog.dart';
 import 'package:delivery_service_riders/widgets/loading_dialog.dart';
 import 'package:delivery_service_riders/widgets/order_status_help.dart';
 import 'package:delivery_service_riders/widgets/order_status_widget.dart';
+import 'package:delivery_service_riders/widgets/show_floating_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shimmer/shimmer.dart';
@@ -163,6 +165,49 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             partnerName: name, partnerID: id, imageURL: imageURL, partnerRole: role,),
       ),
     );
+  }
+
+  void cancelOrder(String orderID) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return const LoadingDialog(
+          message: 'Cancelling order',
+        );
+      },
+    );
+
+    DocumentReference orderDocument = firebaseFirestore
+        .collection('active_orders')
+        .doc(orderID);
+
+    try {
+      await orderDocument.update({
+        'orderStatus': 'Waiting',
+        'storeStatus': 'Waiting',
+        'userStatus': 'Waiting',
+        'riderProfileURL': null,
+        'riderID': null,
+        'riderName': null,
+        'riderPhone': null,
+        'riderLocation': null,
+      });
+
+    } catch (e) {
+      //Close loading dialog
+      Navigator.pop(context);
+
+      showFloatingToast(context: context, message: 'Error occurred, please try again.');
+    }
+
+    //Close loading dialog
+    Navigator.pop(context);
+
+    //Close Order Details Screen
+    Navigator.pop(context);
+
+    //Show Toast for Cancellation Success
+    showFloatingToast(context: context, message: 'Order successfully cancelled', backgroundColor: Colors.green);
   }
 
   @override
@@ -448,6 +493,33 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 serviceFee: widget.order!.serviceFee!,
                 orderTotal: widget.order!.orderTotal!,
               ),
+              if(widget.order!.orderStatus == 'Assigned')
+                InkWell(
+                  onTap: () async {
+                    bool? isConfirm = await ConfirmationDialog.show(context, 'Cancel Order?', 'Are you sure you want to cancel this order?');
+
+                    if (isConfirm == true) {
+                      cancelOrder(widget.order!.orderID!);
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    color: Colors.white,
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Cancel Order',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

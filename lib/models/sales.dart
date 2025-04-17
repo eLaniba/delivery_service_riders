@@ -19,17 +19,17 @@ class Sales {
     required this.serviceFeeTotal,
   });
 
-  factory Sales.fromJson(Map<String, dynamic> json) {
-    return Sales(
-      earnings: (json['earnings'] as num?)?.toDouble() ?? 0.0,
-      orderCompleted: json['orderCompleted'] as Timestamp,
-      orderID: json['orderID'] ?? '',
-      paymentMethod: json['paymentMethod'] ?? '',
-      serviceCommission: (json['serviceCommission'] as num?)?.toDouble() ?? 0.0,
-      serviceFee: (json['serviceFee'] as num?)?.toDouble() ?? 0.0,
-      serviceFeeTotal: (json['serviceFeeTotal'] as num?)?.toDouble() ?? 0.0,
-    );
-  }
+    factory Sales.fromJson(Map<String, dynamic> json) {
+      return Sales(
+        earnings: (json['earnings'] as num?)?.toDouble() ?? 0.0,
+        orderCompleted: json['orderCompleted'] as Timestamp? ?? Timestamp.now(),
+        orderID: json['orderID'] ?? '',
+        paymentMethod: json['paymentMethod'] ?? '',
+        serviceCommission: (json['serviceCommission'] as num?)?.toDouble() ?? 0.0,
+        serviceFee: (json['serviceFee'] as num?)?.toDouble() ?? 0.0,
+        serviceFeeTotal: (json['serviceFeeTotal'] as num?)?.toDouble() ?? 0.0,
+      );
+    }
 
   Map<String, dynamic> toJson() {
     return {
