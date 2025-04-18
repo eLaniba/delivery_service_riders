@@ -509,7 +509,7 @@ class _SignUpStepperState extends State<SignUpStepper> {
                 labelText: 'Password',
                 controller: passwordController,
                 isObscure: _isPasswordHidden,
-                validator: validatePassword,
+                validator: validatePasswordNewStandard,
                 suffixIcon: IconButton(
                   onPressed: () {
                     setState(() {

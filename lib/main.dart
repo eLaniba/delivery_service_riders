@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Grider',
+      title: 'tindaPHrider',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSwatch(
             primarySwatch: Colors.blue, // Main color

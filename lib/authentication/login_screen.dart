@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delivery_service_riders/authentication/auth_screen.dart';
 import 'package:delivery_service_riders/authentication/email_verification_page.dart';
+import 'package:delivery_service_riders/authentication/reset_password_screen.dart';
 import 'package:delivery_service_riders/global/global.dart';
 import 'package:delivery_service_riders/mainScreens/main_screen_provider.dart';
 import 'package:delivery_service_riders/services/auth_service.dart';
@@ -354,10 +355,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       TextButton(
                         onPressed: () {
                           // Add your navigation or action here for Sign Up
-                          // Navigator.pushReplacement(
-                          //   context,
-                          //   MaterialPageRoute(builder: (context) => const EmailVerificationPage()),
-                          // );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ResetPasswordScreen()),
+                          );
                         },
                         style: TextButton.styleFrom(
                           splashFactory: NoSplash.splashFactory,

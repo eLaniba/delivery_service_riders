@@ -363,8 +363,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                           riderInfoContainer(
                             context: context,
                             icon: PhosphorIcons.moped(PhosphorIconsStyle.bold),
-                            name: '${order.riderName!} (You)',
-                            phone: order.riderPhone!,
+                            name: '(You) ${order.riderName!}',
+                            phone: reformatPhoneNumber(order.riderPhone!),
                           ),
                         ]
                       ],
