@@ -62,12 +62,19 @@ class _EarningsScreenState extends State<EarningsScreen> with SingleTickerProvid
   }
 
   Widget _buildSalesTab({required String paymentMethod}) {
+    final now = DateTime.now();
+    final startOfMonth = DateTime(now.year, now.month, 1);
+    final startOfNextMonth = DateTime(now.year, now.month + 1, 1);
+
     return FutureBuilder<QuerySnapshot>(
       future: _firestore
           .collection('riders')
           .doc(widget.riderID)
           .collection('transactions')
           .where('paymentMethod', isEqualTo: paymentMethod)
+          .where('orderCompleted', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
+          .where('orderCompleted', isLessThan: Timestamp.fromDate(startOfNextMonth))
+          .orderBy('orderCompleted', descending: false)
           .get(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {

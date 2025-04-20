@@ -13,6 +13,12 @@ exports.completeOrderStoreRider = functions.firestore
         console.log("Previous Data:", previousValue);
         console.log("New Data:", newValue);
 
+        // Prevent duplicate execution if storeStatus is already Completed
+        if (newValue.storeStatus === "Completed") {
+            console.log("Store status already completed. Skipping update.");
+            return null;
+        }
+
         // Check if storeDelivered or riderStoreDelivered has changed
         if (
             newValue.storeDelivered !== previousValue.storeDelivered ||
@@ -21,8 +27,7 @@ exports.completeOrderStoreRider = functions.firestore
             // If storeDelivered is not null, riderStoreDelivered is true, and storeStatus is not 'Completed'
             if (
                 newValue.storeDelivered !== null &&
-                newValue.riderStoreDelivered === true &&
-                newValue.storeStatus !== "Completed"
+                newValue.riderStoreDelivered === true
             ) {
                 console.log("Conditions met. Updating order status fields...");
 
@@ -37,7 +42,7 @@ exports.completeOrderStoreRider = functions.firestore
         return null;
     });
 
-//Confirmation between Rider and User
+// Confirmation between Rider and User
 exports.completeOrderUserRider = functions.firestore
     .document("active_orders/{orderId}")
     .onUpdate((change, context) => {
@@ -46,6 +51,12 @@ exports.completeOrderUserRider = functions.firestore
 
         console.log("Previous Data:", previousValue);
         console.log("New Data:", newValue);
+
+        // Prevent duplicate execution if already marked as Completed
+        if (newValue.orderStatus === "Completed") {
+            console.log("Order already completed. Skipping update.");
+            return null;
+        }
 
         // Check if userDelivered or riderUserDelivered has changed
         if (
@@ -64,8 +75,10 @@ exports.completeOrderUserRider = functions.firestore
                 });
             }
         }
+
         return null;
     });
+
 
 
 

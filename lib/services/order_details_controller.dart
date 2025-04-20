@@ -425,7 +425,19 @@ void _acceptOrder(BuildContext context, NewOrder order) async {
       });
     });
 
-    // Continue with success actions...
+    //Write as recent rider in the store
+    String riderID = sharedPreferences!.getString('uid')!;
+    String storeID = order.storeID!;
+    await firebaseFirestore
+        .collection('stores')
+        .doc(storeID)
+        .collection('recent_riders')
+        .doc(riderID)
+        .set({
+      'riderID': riderID,
+      'timestamp': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+
     Navigator.of(context).pop();
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MainScreenProvider(mainScreenIndex: 1, inProgressScreenIndex: 0)));
 
